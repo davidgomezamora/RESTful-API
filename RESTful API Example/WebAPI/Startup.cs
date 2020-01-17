@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApplicationCore.Services;
 using Infraestructure.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -56,7 +57,7 @@ namespace WebAPI
             services.AddScoped(typeof(DbContext), typeof(AdventureWorks2017Context));
 
             // Servicios de la capa ApplicationCore
-            // services.AddScoped(typeof(IBlogService), typeof(BlogService));
+            services.AddScoped(typeof(IProductService), typeof(ProductService));
 
             /*
              * ---------------------------------------------------------

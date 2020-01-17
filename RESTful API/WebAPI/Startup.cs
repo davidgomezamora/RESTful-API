@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,20 +62,20 @@ namespace WebAPI
              * ---------------------------------------------------------
              */
 
-            /*services.AddApiVersioning(options => {
+            services.AddApiVersioning(options => {
                 // Cabezera HTTP, donde debe espesificarse la versión del web API a usar
-                HeaderApiVersionReader multiVersionReader = new HeaderApiVersionReader("api-version");
+                HeaderApiVersionReader multiVersionReader = new HeaderApiVersionReader("x-version");
                 // Indica que en la petición señalamos qué versión de la API soporta la petición que hemos realizado.
                 options.ReportApiVersions = true;
 
                 // En caso de que no se notifique la versión en la petición, cómo tratamos dicha petición (si se envía un error o bien si asume la versión por defecto).
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 // Versión por defecto la API
-                options.DefaultApiVersion = new ApiVersion(2, 0);
+                options.DefaultApiVersion = new ApiVersion(1, 0);
 
                 // Ubicación donde indicamos la versión, ya sea por QueryString o por HeaderAPIVersión
                 options.ApiVersionReader = multiVersionReader;
-            });*/
+            });
 
             /*
              * ---------------------------------------------------------
@@ -81,17 +83,17 @@ namespace WebAPI
              * ---------------------------------------------------------
              */
 
-            /*services.AddMvc(options => {
+            services.AddMvc(options => {
                 // Respeta la cabezera HTTP (Accept), donde el cliente espesifica el formato en el que requiere recibir la información por parte del controlador/web API.
                 // Si el formato solicitado no es soportado, se retorna la información en el formato definido por omición por .Net Core, el cual es JSON.
 
                 options.RespectBrowserAcceptHeader = true;
                 // Adiciona soporte al formato XML; como serialización de retorno de datos, por parte del controlador/web API
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
-            });*/
+            });
 
             // Adiciona soporte al formato XML; como serialización de entrada de datos, por parte del controlador/web API
-            // services.AddMvc().AddXmlSerializerFormatters();
+            services.AddMvc().AddXmlSerializerFormatters();
 
             /*
              * ---------------------------------------------------------

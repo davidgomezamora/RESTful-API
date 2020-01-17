@@ -7,7 +7,7 @@ using Common.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace RESTful_API_Example.Controllers
+namespace RESTful_API_Demo.Controllers
 {
     // Control de versiones soportadas por el endpoint de este controlador
     [ApiVersion("1.0")]

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>RESTful_API_Example</RootNamespace>
+    <RootNamespace>RESTful_API_Demo</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

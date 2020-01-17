@@ -29,23 +29,23 @@ namespace RESTful_API_Example.Controllers
 
         // [GET]: .../api/products/
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> GetProduct()
+        public ActionResult<IEnumerable<ProductDto>> GetProduct()
         {
-            List<ProductDTO> productDTOs = this._productService.GetProducts();
+            List<ProductDto> productDtos = this._productService.GetProducts();
 
-            if(productDTOs.Count() == 0)
+            if(productDtos.Count() == 0)
             {
                 return NoContent();
             }
 
-            return Ok(productDTOs);
+            return Ok(productDtos);
         }
 
         // [GET]: .../api/products/{id}
         [HttpGet("{productId}")]
-        public ActionResult<ProductDTO> GetProduct(int productId)
+        public ActionResult<ProductDto> GetProduct(int productId)
         {
-            ProductDTO productDTO = this._productService.GetProduct(productId);
+            ProductDto productDTO = this._productService.GetProduct(productId);
 
             if(productDTO == null)
             {

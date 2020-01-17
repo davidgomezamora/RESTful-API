@@ -19,14 +19,14 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(repository));
         }
 
-        public List<ProductDTO> GetProducts()
+        public List<ProductDto> GetProducts()
         {
-            return ParseToObject<ProductDTO>(this._repository.GetList());
+            return ParseToObject<ProductDto>(this._repository.GetList());
         }
 
-        public ProductDTO GetProduct<T>(T productId)
+        public ProductDto GetProduct<T>(T productId)
         {
-            return ParseToObject<ProductDTO>(this._repository.GetById(productId));
+            return ParseToObject<ProductDto>(this._repository.GetById(productId));
         }
 
         private O ParseToObject<O>(Product entity)

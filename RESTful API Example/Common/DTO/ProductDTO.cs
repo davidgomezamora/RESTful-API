@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Common.DTO
 {
-    public class ProductDTO
+    public class ProductDto
     {
         public int ProductId { get; set; }
         public string Name { get; set; }

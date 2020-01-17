@@ -9,5 +9,7 @@ namespace Common.DTO
         public int ProductId { get; set; }
         public string Name { get; set; }
         public string ProductNumber { get; set; }
+        public bool? MakeFlag { get; set; }
+        public string NameNumber { get; set; }
     }
 }

@@ -99,6 +99,7 @@ namespace WebAPI
              * Requiere la dependencia con la capa ApplicationCore
              */
             services.AddScoped(typeof(IProductService), typeof(ProductService));
+            services.AddScoped(typeof(IProductModelService), typeof(ProductModelService));
 
             /*
              * ---------------------------------------------------------

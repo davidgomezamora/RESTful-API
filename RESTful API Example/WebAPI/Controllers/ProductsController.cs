@@ -41,7 +41,7 @@ namespace RESTful_API_Example.Controllers
             return Ok(productDtos);
         }
 
-        // [GET]: .../api/products/{id}
+        // [GET]: .../api/products/{id}/
         [HttpGet("{productId}")]
         public ActionResult<ProductDto> GetProduct(int productId)
         {
@@ -52,7 +52,21 @@ namespace RESTful_API_Example.Controllers
                 return NotFound();
             }
 
-            return Ok(this._productService.GetProduct(productId));
+            return Ok(productDTO);
+        }
+
+        // [GET] .../api/products/{id}/productmodels/
+        [HttpGet("{productId}/productmodels")]
+        public ActionResult<ProductModelDto> GetProductModelsForProductId(int productId)
+        {
+            ProductModelDto productModelDTO = this._productService.GetProductModel(productId);
+
+            if (productModelDTO == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(productModelDTO);
         }
     }
 }

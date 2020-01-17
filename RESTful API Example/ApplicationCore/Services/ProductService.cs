@@ -1,6 +1,5 @@
 ﻿using Common.DTO;
 using Infraestructure.Entities;
-using Newtonsoft.Json;
 using Repository;
 using System;
 using System.Collections.Generic;
@@ -14,15 +13,21 @@ namespace ApplicationCore.Services
         private readonly IRepository<Product> _repository;
         private readonly IMapper _mapper;
 
-        // Inyección del servicio: Repository
+        private readonly IProductModelService _productModelService;
+
+        // Inyección de los servicios: Repository y Mapper
         public ProductService(IRepository<Product> repository,
-            IMapper mapper)
+            IMapper mapper,
+            IProductModelService productModelService)
         {
             this._repository = repository ??
                 throw new ArgumentNullException(nameof(repository));
 
             this._mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+
+            this._productModelService = productModelService ??
+                throw new ArgumentNullException(nameof(productModelService));
         }
 
         public List<ProductDto> GetProducts()
@@ -33,6 +38,11 @@ namespace ApplicationCore.Services
         public ProductDto GetProduct<T>(T productId)
         {
             return this._mapper.Map<ProductDto>(this._repository.GetById(productId));
+        }
+
+        public ProductModelDto GetProductModel<T>(T productId)
+        {
+            return this._mapper.Map<ProductModelDto>(this._productModelService.GetProductModel(this._repository.GetById(productId).ProductModelId));
         }
     }
 }

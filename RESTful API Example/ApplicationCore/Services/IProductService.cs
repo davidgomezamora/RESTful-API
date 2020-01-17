@@ -8,7 +8,7 @@ namespace ApplicationCore.Services
     public interface IProductService
     {
         List<ProductDto> GetProducts();
-
         ProductDto GetProduct<T>(T productId);
+        ProductModelDto GetProductModel<T>(T productId);
     }
 }

@@ -11,12 +11,12 @@ namespace Common.Mapper
     {
         public ProductsProfile()
         {
-
+            // Definición de como debe mapearse la entidad y el DTO
             CreateMap<Product, ProductDto>()
                 .ForMember(
                     dest => dest.NameNumber,
                     opt => opt.MapFrom(src => src.Name + "-" + src.ProductNumber)
-                );
+                ).ReverseMap();
         }
     }
 }

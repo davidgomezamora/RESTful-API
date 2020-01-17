@@ -12,6 +12,7 @@ namespace ApplicationCore.Services
     {
         private readonly IRepository<Product> _repository;
 
+        // Inyección del servicio: Repository
         public ProductService(IRepository<Product> repository)
         {
             this._repository = repository ??
@@ -21,6 +22,17 @@ namespace ApplicationCore.Services
         public List<ProductDTO> GetProducts()
         {
             return ParseToObject<ProductDTO>(this._repository.GetList());
+        }
+
+        public ProductDTO GetProduct<T>(T productId)
+        {
+            return ParseToObject<ProductDTO>(this._repository.GetById(productId));
+        }
+
+        private O ParseToObject<O>(Product entity)
+        {
+            string serializeObjectSource = JsonConvert.SerializeObject(entity);
+            return JsonConvert.DeserializeObject<O>(serializeObjectSource);
         }
 
         private List<O> ParseToObject<O>(List<Product> entityList)

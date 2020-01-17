@@ -9,14 +9,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RESTful_API_Example.Controllers
 {
+    // Control de versiones soportadas por el endpoint de este controlador
     [ApiVersion("1.0")]
+    // Control de versiones no soportadas por el endpoint de este controlador
     [ApiVersion("0.5", Deprecated = true)]
+    // Definición del endpoint de este controlador ../api/products/
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
 
+        // Inyección del servicio de la capa ApplicationCore
         public ProductsController(IProductService productService)
         {
             this._productService = productService  ??
@@ -27,14 +31,28 @@ namespace RESTful_API_Example.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<ProductDTO>> GetProduct()
         {
-            return this._productService.GetProducts();
+            List<ProductDTO> productDTOs = this._productService.GetProducts();
+
+            if(productDTOs.Count() == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(productDTOs);
         }
 
         // [GET]: .../api/products/{id}
-        /*[HttpGet()]
-        public ActionResult<IEnumerable<ProductDTO>> GetProduct(int id)
+        [HttpGet("{productId}")]
+        public ActionResult<ProductDTO> GetProduct(int productId)
         {
-            return this._productService.GetProducts();
-        }*/
+            ProductDTO productDTO = this._productService.GetProduct(productId);
+
+            if(productDTO == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(this._productService.GetProduct(productId));
+        }
     }
 }

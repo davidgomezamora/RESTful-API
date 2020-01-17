@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ApplicationCore.Services;
 using Infraestructure.Context;
@@ -31,7 +32,27 @@ namespace WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            /*
+             * ---------------------------------------------------------
+             * Configuración del servicio de serialización de datos diferentes a JSON
+             * ---------------------------------------------------------
+             */
+
+            services.AddControllers(options => {
+                // Definir en true si queremos que se retorne un código 406 Not Acceptable; cuando se solicite en la cabezera Accept, un formato no soportado
+                // Definir en false si queremos que se retorne la información en el formato por omición y no se entregue un código 406 Not Acceptable
+                options.ReturnHttpNotAcceptable = true;
+
+                /*
+                 * Respeta la cabezera HTTP (Accept), donde el cliente espesifica el formato en el que requiere recibir la información por parte del controlador/web API.
+                 * Si el formato solicitado no es soportado, se retorna la información en el formato definido por omición por .Net Core, el cual es JSON.
+                 */
+                options.RespectBrowserAcceptHeader = true;
+
+                // Adiciona soporte al formato XML; como serialización de retorno de datos, por parte del controlador/web API
+                options.OutputFormatters.Add(
+                    new XmlDataContractSerializerOutputFormatter());
+            }).AddXmlDataContractSerializerFormatters();
 
             /*
              * ---------------------------------------------------------
@@ -51,12 +72,22 @@ namespace WebAPI
              * ---------------------------------------------------------
              */
 
-            // Repositorio
+            /*
+             * Repositorio
+             * Requiere del paquete Nuget: Repository (David Andrés Gómez Zamora)
+             */
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            // Contexto de la base de datos
+
+            /*
+             *Contexto de la base de datos
+             * Requiere del paquete Nuget: Microsoft.EntityFrameworkCore (Nuget.org), no es necesario instalarlo si se tiene instalado el paquete Repository (David Andrés Gómez Zamora)
+             */
             services.AddScoped(typeof(DbContext), typeof(AdventureWorks2017Context));
 
-            // Servicios de la capa ApplicationCore
+            /*
+             * Servicios de la capa ApplicationCore
+             * Requiere la dependencia con la capa ApplicationCore
+             */
             services.AddScoped(typeof(IProductService), typeof(ProductService));
 
             /*
@@ -65,6 +96,10 @@ namespace WebAPI
              * ---------------------------------------------------------
              */
 
+            /*
+             * Versionamiento de una web API
+             * Requiere del paquete Nuget: Microsoft.AspNetCore.Mvc.Versioning (Nuget.org)
+             */
             services.AddApiVersioning(options => {
                 // Cabezera HTTP, donde debe espesificarse la versión del web API a usar
                 HeaderApiVersionReader multiVersionReader = new HeaderApiVersionReader("x-version");
@@ -79,24 +114,6 @@ namespace WebAPI
                 // Ubicación donde indicamos la versión, ya sea por QueryString o por HeaderAPIVersión
                 options.ApiVersionReader = multiVersionReader;
             });
-
-            /*
-             * ---------------------------------------------------------
-             * Configuración del servicio de serialización de datos
-             * ---------------------------------------------------------
-             */
-
-            services.AddMvc(options => {
-                // Respeta la cabezera HTTP (Accept), donde el cliente espesifica el formato en el que requiere recibir la información por parte del controlador/web API.
-                // Si el formato solicitado no es soportado, se retorna la información en el formato definido por omición por .Net Core, el cual es JSON.
-
-                options.RespectBrowserAcceptHeader = true;
-                // Adiciona soporte al formato XML; como serialización de retorno de datos, por parte del controlador/web API
-                options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
-            });
-
-            // Adiciona soporte al formato XML; como serialización de entrada de datos, por parte del controlador/web API
-            services.AddMvc().AddXmlSerializerFormatters();
 
             /*
              * ---------------------------------------------------------

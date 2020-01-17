@@ -54,7 +54,7 @@ namespace WebAPI
 
             /*
              * Mapeo de entidades a DTOs
-             * La capa web Common requiere el paquete Nuget: AutoMapper.Extensions.Microsoft.DependencyInjection (Nuget.org)
+             * La capa Infraestructure requiere el paquete Nuget: AutoMapper.Extensions.Microsoft.DependencyInjection (Nuget.org)
              * Agregar [using AutoMapper;] en este archivo
              */
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

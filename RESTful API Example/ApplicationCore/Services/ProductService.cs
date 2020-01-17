@@ -13,6 +13,7 @@ namespace ApplicationCore.Services
         private readonly IRepository<Product> _repository;
         private readonly IMapper _mapper;
 
+        // Interfaz de servicios de entidades secundarias
         private readonly IProductModelService _productModelService;
 
         // Inyección de los servicios: Repository y Mapper

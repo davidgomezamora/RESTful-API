@@ -68,5 +68,12 @@ namespace RESTful_API_Example.Controllers
 
             return Ok(productModelDTO);
         }
+
+        // [GET]: .../api/products/error/
+        [HttpGet("error")]
+        public ActionResult<ProductDto> GetError()
+        {
+            throw new Exception("This is a test exception.");
+        }
     }
 }

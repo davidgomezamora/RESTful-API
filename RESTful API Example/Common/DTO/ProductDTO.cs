@@ -11,7 +11,5 @@ namespace Common.DTO
         public string ProductNumber { get; set; }
         public bool? MakeFlag { get; set; }
         public string NameNumber { get; set; }
-
-        public int? ProductModelId { get; set; }
     }
 }

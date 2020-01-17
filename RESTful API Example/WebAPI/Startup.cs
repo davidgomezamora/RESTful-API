@@ -7,6 +7,7 @@ using ApplicationCore.Services;
 using Infraestructure.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -153,12 +154,24 @@ namespace WebAPI
         {
             if (env.IsDevelopment())
             {
+                // Define mostrar total detalle del error
                 app.UseDeveloperExceptionPage();
 
                 // Usa el CORS espesificado
                 app.UseCors("Development");
             } else
             {
+                // Definir mensaje de error cuando este sea un error inesperado del lado el servidor.
+                app.UseExceptionHandler(erroApi => 
+                {
+                    erroApi.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        context.Response.ContentType = "text/plain";
+                        await context.Response.WriteAsync("An unexpected failure occurred. Try again later.");
+                    });
+                });
+
                 // Usa el CORS espesificado
                 app.UseCors("Production");
             }

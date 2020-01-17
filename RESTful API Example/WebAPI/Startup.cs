@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Infraestructure.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -38,9 +39,10 @@ namespace WebAPI
              */
 
             // Establece el contexto de la base de datos y define la cadena de conexión establecida en el archivo appsettings.json
-            /*services.AddDbContext<DatabaseContext>(options => {
+            services.AddDbContext<AdventureWorks2017Context>(options => {
+                // ConnectionsString > ConnectionDatabase
                 options.UseSqlServer(this.Configuration.GetConnectionString("ConnectionDatabase"));
-            });*/
+            });
 
             /*
              * ---------------------------------------------------------
@@ -51,7 +53,7 @@ namespace WebAPI
             // Repositorio
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             // Contexto de la base de datos
-            // services.AddScoped(typeof(DbContext), typeof(DatabaseContext));
+            services.AddScoped(typeof(DbContext), typeof(AdventureWorks2017Context));
 
             // Servicios de la capa ApplicationCore
             // services.AddScoped(typeof(IBlogService), typeof(BlogService));

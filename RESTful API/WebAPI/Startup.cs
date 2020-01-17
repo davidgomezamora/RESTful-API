@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Repository;
+using AutoMapper;
 
 namespace WebAPI
 {
@@ -52,6 +53,13 @@ namespace WebAPI
             }).AddXmlDataContractSerializerFormatters();
 
             /*
+             * Mapeo de entidades a DTOs
+             * La capa web Common requiere el paquete Nuget: AutoMapper.Extensions.Microsoft.DependencyInjection (Nuget.org)
+             * Agregar [using AutoMapper;] en este archivo
+             */
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            /*
              * ---------------------------------------------------------
              * Configuración del contexto de la base de datos y la cadena de conexión
              * ---------------------------------------------------------
@@ -72,6 +80,7 @@ namespace WebAPI
             /*
              * Repositorio
              * Requiere del paquete Nuget: Repository (David Andrés Gómez Zamora)
+             * Agregar [using Repository;] en este archivo
              */
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 

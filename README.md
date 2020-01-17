@@ -17,13 +17,3 @@ If you like test the web API in localhost or the web API deployed in Azure, you 
   5. Open the Sample web APIs collection
   6. Open RESTful web API folder
   7. Run the URL you need
-
-## Implement template
-To implement the template, it is necessary to rename the Visual Studio 2019 solution like this:
-
-  1. Open the solution
-  2. From Visual Studio 2019, rename the solution.
-  3. Close the solution
-  4. Rename the folder
-  5. Open the WebAPI project file (.csproj) with a text editor
-  6. Rename the <RootNamespace> tag to the name of the solution indicated in the second step.

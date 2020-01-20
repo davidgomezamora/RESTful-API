@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
+using System.Linq;
 
 namespace ApplicationCore.Services
 {
@@ -31,9 +32,48 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(productModelService));
         }
 
-        public List<ProductDto> GetProducts()
+        public List<ProductDto> GetProducts(string color = "", string searchName = "")
         {
-            return this._mapper.Map<List<ProductDto>>(this._repository.GetList());
+            // Resuelve la solicitud de lista de resultados sin filtros
+            if (string.IsNullOrWhiteSpace(color) && string.IsNullOrWhiteSpace(searchName))
+            {
+                return this._mapper.Map<List<ProductDto>>(this._repository.GetList());
+            }
+
+            // Lista de entidades: Product
+            List<Product> products = new List<Product>();
+
+            // Resuelve el filtro
+            if (!string.IsNullOrWhiteSpace(color))
+            {
+                color = color.Trim();
+
+                QueryParameters<Product> queryParameters = new QueryParameters<Product>(1, 100);
+
+                queryParameters.where = x => x.Color == color;
+
+                products = this._repository.FindBy(queryParameters);
+            }
+
+            // Resuelve la busqueda
+            if (!string.IsNullOrWhiteSpace(searchName))
+            {
+                searchName = searchName.Trim();
+
+                if (!string.IsNullOrWhiteSpace(color))
+                {
+                    return this._mapper.Map<List<ProductDto>>(products.Where(x => x.Name.Contains(searchName)));
+                }
+
+                QueryParameters<Product> queryParameters = new QueryParameters<Product>(1, 100);
+
+                queryParameters.where = x => x.Name.Contains(searchName);
+
+                products = this._repository.FindBy(queryParameters);
+            }
+
+            // Retorna el resultado con filtro y/o busqueda
+            return this._mapper.Map<List<ProductDto>>(products);
         }
 
         public ProductDto GetProduct<T>(T productId)

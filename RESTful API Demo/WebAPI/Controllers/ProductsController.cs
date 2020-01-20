@@ -28,10 +28,13 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET]: .../api/products/
+        // [GET]: .../api/products?color={value}
+        // [GET]: .../api/products?searchName={value}
+        // [GET]: .../api/products?color={value}&searchName={value}
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDto>> GetProduct()
+        public ActionResult<IEnumerable<ProductDto>> GetProducts(string color, string searchName)
         {
-            List<ProductDto> productDtos = this._productService.GetProducts();
+            List<ProductDto> productDtos = this._productService.GetProducts(color, searchName);
 
             if(productDtos.Count() == 0)
             {

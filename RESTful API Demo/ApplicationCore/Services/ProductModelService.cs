@@ -1,10 +1,11 @@
-﻿using Common.DTO;
+﻿using Common.DTO.Product;
 using Infraestructure.Entities;
 using Repository;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
+using Common.DTO.ProductModel;
 
 namespace ApplicationCore.Services
 {

@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
-using Common.DTO;
+using Common.DTO.Product;
 using Infraestructure.Entities;
 
 namespace Common.Mapper
 {
-    public class ProductsProfile : Profile
+    public class ProductProfile : Profile
     {
-        public ProductsProfile()
+        public ProductProfile()
         {
             // Definición de como debe mapearse la entidad y el DTO
             CreateMap<Product, ProductDto>()

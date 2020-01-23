@@ -1,4 +1,4 @@
-﻿using Common.DTO;
+﻿using Common.DTO.Product;
 using Infraestructure.Entities;
 using Repository;
 using System;
@@ -7,6 +7,7 @@ using System.Text;
 using AutoMapper;
 using System.Linq;
 using Common.ResourceParameters;
+using Common.DTO.ProductModel;
 
 namespace ApplicationCore.Services
 {

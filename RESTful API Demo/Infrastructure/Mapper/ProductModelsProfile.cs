@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
 using Common.DTO;
+using Common.DTO.ProductModel;
 using Infraestructure.Entities;
 
 namespace Common.Mapper

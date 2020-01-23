@@ -1,4 +1,5 @@
-﻿using Common.DTO;
+﻿using Common.DTO.Product;
+using Common.DTO.ProductModel;
 using Common.ResourceParameters;
 using System;
 using System.Collections.Generic;

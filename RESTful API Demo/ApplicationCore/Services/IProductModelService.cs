@@ -1,4 +1,5 @@
-﻿using Common.DTO;
+﻿using Common.DTO.Product;
+using Common.DTO.ProductModel;
 using Infraestructure.Entities;
 using System;
 using System.Collections.Generic;

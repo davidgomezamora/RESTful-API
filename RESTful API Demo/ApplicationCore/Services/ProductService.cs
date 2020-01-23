@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
 using System.Linq;
+using Common.ResourceParameters;
 
 namespace ApplicationCore.Services
 {
@@ -32,10 +33,10 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(productModelService));
         }
 
-        public List<ProductDto> GetProducts(string color = "", string searchName = "")
+        public List<ProductDto> GetProducts(ProductResourceParameters productResourceParameters)
         {
             // Resuelve la solicitud de lista de resultados sin filtros
-            if (string.IsNullOrWhiteSpace(color) && string.IsNullOrWhiteSpace(searchName))
+            if (string.IsNullOrWhiteSpace(productResourceParameters.Color) && string.IsNullOrWhiteSpace(productResourceParameters.SearchQuery))
             {
                 return this._mapper.Map<List<ProductDto>>(this._repository.GetList());
             }
@@ -44,30 +45,30 @@ namespace ApplicationCore.Services
             List<Product> products = new List<Product>();
 
             // Resuelve el filtro
-            if (!string.IsNullOrWhiteSpace(color))
+            if (!string.IsNullOrWhiteSpace(productResourceParameters.Color))
             {
-                color = color.Trim();
+                productResourceParameters.Color = productResourceParameters.Color.Trim();                
 
                 QueryParameters<Product> queryParameters = new QueryParameters<Product>(1, 100);
 
-                queryParameters.where = x => x.Color == color;
+                queryParameters.where = x => x.Color == productResourceParameters.Color;
 
                 products = this._repository.FindBy(queryParameters);
             }
 
             // Resuelve la busqueda
-            if (!string.IsNullOrWhiteSpace(searchName))
+            if (!string.IsNullOrWhiteSpace(productResourceParameters.SearchQuery))
             {
-                searchName = searchName.Trim();
+                productResourceParameters.SearchQuery = productResourceParameters.SearchQuery.Trim();
 
-                if (!string.IsNullOrWhiteSpace(color))
+                if (!string.IsNullOrWhiteSpace(productResourceParameters.Color))
                 {
-                    return this._mapper.Map<List<ProductDto>>(products.Where(x => x.Name.Contains(searchName)));
+                    return this._mapper.Map<List<ProductDto>>(products.Where(x => x.Name.Contains(productResourceParameters.SearchQuery)));
                 }
 
                 QueryParameters<Product> queryParameters = new QueryParameters<Product>(1, 100);
 
-                queryParameters.where = x => x.Name.Contains(searchName);
+                queryParameters.where = x => x.Name.Contains(productResourceParameters.SearchQuery);
 
                 products = this._repository.FindBy(queryParameters);
             }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Services;
 using Common.DTO;
+using Common.ResourceParameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,9 +33,9 @@ namespace RESTful_API_Demo.Controllers
         // [GET]: .../api/products?searchName={value}
         // [GET]: .../api/products?color={value}&searchName={value}
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDto>> GetProducts(string color, string searchName)
+        public ActionResult<IEnumerable<ProductDto>> GetProducts([FromQuery] ProductResourceParameters productResourceParameters)
         {
-            List<ProductDto> productDtos = this._productService.GetProducts(color, searchName);
+            List<ProductDto> productDtos = this._productService.GetProducts(productResourceParameters);
 
             if(productDtos.Count() == 0)
             {

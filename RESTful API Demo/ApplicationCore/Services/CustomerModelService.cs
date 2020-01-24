@@ -1,21 +1,20 @@
-﻿using Common.DTO.Product;
-using Infraestructure.Entities;
+﻿using Infraestructure.Entities;
 using Repository;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
-using Common.DTO.ProductModel;
+using Common.DTO.Customer;
 
 namespace ApplicationCore.Services
 {
-    public class ProductModelService : IProductModelService
+    public class CustomerService : ICustomerService
     {
-        private readonly IRepository<ProductModel> _repository;
+        private readonly IRepository<Customer> _repository;
         private readonly IMapper _mapper;
 
         // Inyección de los servicios: Repository y Mapper
-        public ProductModelService(IRepository<ProductModel> repository,
+        public CustomerService(IRepository<Customer> repository,
             IMapper mapper)
         {
             this._repository = repository ??
@@ -25,9 +24,14 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        public ProductModelDto GetProductModel<T>(T productModelId)
+        public CustomerDto GetCustomer<T>(T productModelId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /*public ProductModelDto GetCustomer<T>(T productModelId)
         {
             return this._mapper.Map<ProductModelDto>(this._repository.GetById(productModelId));
-        }
+        }*/
     }
 }

@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
-using Common.DTO.Product;
+using Common.DTO.Store;
 using Infraestructure.Entities;
 
 namespace Common.Mapper
 {
-    public class ProductProfile : Profile
+    public class StoreProfile : Profile
     {
-        public ProductProfile()
+        public StoreProfile()
         {
             // Definición de como debe mapearse la entidad y el DTO
-            CreateMap<Product, ProductDto>()
+            CreateMap<Store, StoreDto>()
                 .ForMember(
-                    dest => dest.NameNumber,
-                    opt => opt.MapFrom(src => src.Name + "-" + src.ProductNumber)
+                    dest => dest.ConcatenatedData,
+                    opt => opt.MapFrom(src => src.Name + "-" + src.BusinessEntityId)
                 ).ReverseMap();
         }
     }

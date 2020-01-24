@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Common.ResourceParameters
 {
-    public class ProductResourceParameters : ResourceParameters
+    public class StoreResourceParameters : ResourceParameters
     {
-        public string Color { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }

@@ -17,12 +17,10 @@ namespace ApplicationCore.Services
         private readonly IMapper _mapper;
 
         // Interfaz de servicios de entidades secundarias
-        // private readonly IProductModelService _storeModelService;
 
         // Inyección de los servicios: Repository y Mapper
         public StoreService(IRepository<Store> repository,
-            IMapper mapper/*,
-            IProductModelService storeModelService*/)
+            IMapper mapper)
         {
             this._repository = repository ??
                 throw new ArgumentNullException(nameof(repository));
@@ -39,7 +37,7 @@ namespace ApplicationCore.Services
                 return this._mapper.Map<List<StoreDto>>(this._repository.GetList());
             }
 
-            // Lista de entidades: Product
+            // Lista de entidades: Store
             List<Store> stores = new List<Store>();
 
             // Resuelve el filtro
@@ -90,20 +88,6 @@ namespace ApplicationCore.Services
             queryParameters.PathRelatedEntities = new List<string>() { "Customer" };
 
             return this._mapper.Map<List<CustomerDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Customer).ToList());
-
-            /*List<Customer> CustomerService = new List<Customer>();
-
-            foreach (Store store in this._repository.FindBy(queryParameters))
-            {
-                store.Customer
-            }
-
-            return this._mapper.Map<List<CustomerDto>>(this._repository.FindBy(queryParameters));*/
         }
-
-        /*public ProductModelDto GetProductModel<T>(T rowguid)
-        {
-            return this._mapper.Map<ProductModelDto>(this._storeModelService.GetProductModel(this._repository.GetById(rowguid).SalesPerson));
-        }*/
     }
 }

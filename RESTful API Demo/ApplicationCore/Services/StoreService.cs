@@ -29,11 +29,6 @@ namespace ApplicationCore.Services
 
             this._mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
-
-            /*this._storeModelService = storeModelService ??
-                throw new ArgumentNullException(nameof(storeModelService));*/
-
-            this._repository.propertyId = "Rowguid";
         }
 
         public List<StoreDto> GetStores(StoreResourceParameters storeResourceParameters)
@@ -41,8 +36,6 @@ namespace ApplicationCore.Services
             // Resuelve la solicitud de lista de resultados sin filtros
             if (string.IsNullOrWhiteSpace(storeResourceParameters.ModifiedDate.ToString()) && string.IsNullOrWhiteSpace(storeResourceParameters.SearchQuery))
             {
-                var test = this._repository.GetList();
-
                 return this._mapper.Map<List<StoreDto>>(this._repository.GetList());
             }
 
@@ -54,7 +47,7 @@ namespace ApplicationCore.Services
             {               
                 QueryParameters<Store> queryParameters = new QueryParameters<Store>(1, 100);
 
-                queryParameters.Where = x => x.ModifiedDate == storeResourceParameters.ModifiedDate;
+                queryParameters.Where = x => x.ModifiedDate.Date.Equals(storeResourceParameters.ModifiedDate.Value.Date);
 
                 stores = this._repository.FindBy(queryParameters);
             }
@@ -82,16 +75,30 @@ namespace ApplicationCore.Services
 
         public StoreDto GetStore(Guid rowguid)
         {
-            return this._mapper.Map<StoreDto>(this._repository.GetById(rowguid));
+            QueryParameters<Store> queryParameters = new QueryParameters<Store>(1, 100);
+
+            queryParameters.Where = x => x.Rowguid == rowguid;
+
+            return this._mapper.Map<StoreDto>(this._repository.FindBy(queryParameters).FirstOrDefault());
         }
 
         public List<CustomerDto> GetCustomers(Guid rowguid)
         {
             QueryParameters<Store> queryParameters = new QueryParameters<Store>(1, 100);
 
+            queryParameters.Where = x => x.Rowguid == rowguid;
             queryParameters.PathRelatedEntities = new List<string>() { "Customer" };
 
-            return this._mapper.Map<List<CustomerDto>>(this._repository.GetById(rowguid, queryParameters).Customer);
+            return this._mapper.Map<List<CustomerDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Customer).ToList());
+
+            /*List<Customer> CustomerService = new List<Customer>();
+
+            foreach (Store store in this._repository.FindBy(queryParameters))
+            {
+                store.Customer
+            }
+
+            return this._mapper.Map<List<CustomerDto>>(this._repository.FindBy(queryParameters));*/
         }
 
         /*public ProductModelDto GetProductModel<T>(T rowguid)

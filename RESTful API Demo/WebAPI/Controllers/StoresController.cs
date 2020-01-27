@@ -30,9 +30,9 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET]: .../api/stores/
-        // [GET]: .../api/stores?color={value}
-        // [GET]: .../api/stores?searchName={value}
-        // [GET]: .../api/stores?color={value}&searchName={value}
+        // [GET]: .../api/stores?modifiedDate={value}
+        // [GET]: .../api/stores?searchQuery={value}
+        // [GET]: .../api/stores?modifiedDate={value}&searchQuery={value}
         [HttpGet]
         public ActionResult<IEnumerable<StoreDto>> GetStores([FromQuery] StoreResourceParameters storeResourceParameters)
         {

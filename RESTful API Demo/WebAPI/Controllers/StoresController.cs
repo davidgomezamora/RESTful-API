@@ -34,9 +34,9 @@ namespace RESTful_API_Demo.Controllers
         // [GET]: .../api/stores?searchQuery={value}
         // [GET]: .../api/stores?modifiedDate={value}&searchQuery={value}
         [HttpGet]
-        public ActionResult<IEnumerable<StoreDto>> GetStores([FromQuery] StoreResourceParameters storeResourceParameters)
+        public ActionResult<IEnumerable<EmployeeDto>> GetStores([FromQuery] StoreResourceParameters storeResourceParameters)
         {
-            List<StoreDto> storeDtos = this._storeService.GetStores(storeResourceParameters);
+            List<EmployeeDto> storeDtos = this._storeService.GetStores(storeResourceParameters);
 
             if(storeDtos.Count() == 0)
             {
@@ -47,10 +47,10 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET]: .../api/stores/{rowguid}/
-        [HttpGet("{rowguid}")]
-        public ActionResult<StoreDto> GetStore(Guid rowguid)
+        [HttpGet("{rowguid}", Name = "GetStore")]
+        public ActionResult<EmployeeDto> GetStore(Guid rowguid)
         {
-            StoreDto storeDTO = this._storeService.GetStore(rowguid);
+            EmployeeDto storeDTO = this._storeService.GetStore(rowguid);
 
             if(storeDTO == null)
             {
@@ -74,9 +74,22 @@ namespace RESTful_API_Demo.Controllers
             return Ok(customerDtos);
         }
 
+        [HttpPost]
+        public ActionResult<EmployeeDto> AddStore(EmployeeForAdditionDto storeForAdditionDto)
+        {
+            EmployeeDto storeDto = this._storeService.AddStore(storeForAdditionDto);
+
+            if(storeDto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(storeDto);
+        }
+
         // [GET]: .../api/stores/error/
         [HttpGet("error")]
-        public ActionResult<StoreDto> GetError()
+        public ActionResult<EmployeeDto> GetError()
         {
             throw new Exception("This is a test exception.");
         }

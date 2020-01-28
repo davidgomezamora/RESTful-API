@@ -12,10 +12,16 @@ namespace Common.Mapper
         public StoreProfile()
         {
             // Definición de como debe mapearse la entidad y el DTO
-            CreateMap<Store, StoreDto>()
+            CreateMap<Store, EmployeeDto>()
                 .ForMember(
                     dest => dest.ConcatenatedData,
                     opt => opt.MapFrom(src => src.Name + "-" + src.BusinessEntityId)
+                ).ReverseMap();
+
+            CreateMap<EmployeeForAdditionDto, Store>()
+                .ForMember(
+                    dest => dest.BusinessEntity,
+                    opt => opt.Ignore()
                 ).ReverseMap();
         }
     }

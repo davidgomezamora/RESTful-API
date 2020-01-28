@@ -9,8 +9,10 @@ namespace ApplicationCore.Services
 {
     public interface IStoreService
     {
-        List<StoreDto> GetStores(StoreResourceParameters storeResourceParameters);
-        StoreDto GetStore(Guid rowguid);
+        List<EmployeeDto> GetStores(StoreResourceParameters storeResourceParameters);
+        EmployeeDto GetStore(Guid rowguid);
         List<CustomerDto> GetCustomers(Guid rowguid);
+
+        EmployeeDto AddStore(EmployeeForAdditionDto storeForAdditionDto);
     }
 }

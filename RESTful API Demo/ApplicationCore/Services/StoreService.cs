@@ -8,6 +8,7 @@ using AutoMapper;
 using System.Linq;
 using Common.ResourceParameters;
 using Common.DTO.Customer;
+using Common.DTO.BusinessEntity;
 
 namespace ApplicationCore.Services
 {
@@ -17,24 +18,29 @@ namespace ApplicationCore.Services
         private readonly IMapper _mapper;
 
         // Interfaz de servicios de entidades secundarias
+        private readonly IBusinessEntityService _businessEntityService;
 
         // Inyección de los servicios: Repository y Mapper
         public StoreService(IRepository<Store> repository,
-            IMapper mapper)
+            IMapper mapper,
+            IBusinessEntityService businessEntityService)
         {
             this._repository = repository ??
                 throw new ArgumentNullException(nameof(repository));
 
             this._mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+
+            this._businessEntityService = businessEntityService ??
+                throw new ArgumentNullException(nameof(businessEntityService));
         }
 
-        public List<StoreDto> GetStores(StoreResourceParameters storeResourceParameters)
+        public List<EmployeeDto> GetStores(StoreResourceParameters storeResourceParameters)
         {
             // Resuelve la solicitud de lista de resultados sin filtros
             if (string.IsNullOrWhiteSpace(storeResourceParameters.ModifiedDate.ToString()) && string.IsNullOrWhiteSpace(storeResourceParameters.SearchQuery))
             {
-                return this._mapper.Map<List<StoreDto>>(this._repository.GetList());
+                return this._mapper.Map<List<EmployeeDto>>(this._repository.GetList());
             }
 
             // Lista de entidades: Store
@@ -57,7 +63,7 @@ namespace ApplicationCore.Services
 
                 if (!string.IsNullOrWhiteSpace(storeResourceParameters.ModifiedDate.ToString()))
                 {
-                    return this._mapper.Map<List<StoreDto>>(stores.Where(x => x.Name.Contains(storeResourceParameters.SearchQuery)));
+                    return this._mapper.Map<List<EmployeeDto>>(stores.Where(x => x.Name.Contains(storeResourceParameters.SearchQuery)));
                 }
 
                 QueryParameters<Store> queryParameters = new QueryParameters<Store>(1, 100);
@@ -68,16 +74,16 @@ namespace ApplicationCore.Services
             }
 
             // Retorna el resultado con filtro y/o busqueda
-            return this._mapper.Map<List<StoreDto>>(stores);
+            return this._mapper.Map<List<EmployeeDto>>(stores);
         }
 
-        public StoreDto GetStore(Guid rowguid)
+        public EmployeeDto GetStore(Guid rowguid)
         {
             QueryParameters<Store> queryParameters = new QueryParameters<Store>(1, 100);
 
             queryParameters.Where = x => x.Rowguid == rowguid;
 
-            return this._mapper.Map<StoreDto>(this._repository.FindBy(queryParameters).FirstOrDefault());
+            return this._mapper.Map<EmployeeDto>(this._repository.FindBy(queryParameters).FirstOrDefault());
         }
 
         public List<CustomerDto> GetCustomers(Guid rowguid)
@@ -88,6 +94,26 @@ namespace ApplicationCore.Services
             queryParameters.PathRelatedEntities = new List<string>() { "Customer" };
 
             return this._mapper.Map<List<CustomerDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Customer).ToList());
+        }
+
+        public EmployeeDto AddStore(EmployeeForAdditionDto storeForAdditionDto)
+        {
+            BusinessEntityDto bussinessEntity = this._businessEntityService.GetBusinessEntity(storeForAdditionDto.BusinessEntity);
+
+            if(bussinessEntity == null)
+            {
+                return null;
+            }
+
+            Store store = this._mapper.Map<Store>(storeForAdditionDto);
+
+            // store.BusinessEntityId = bussinessEntity.BusinessEntityId;
+
+            bool result = this._repository.Add(store);
+
+            EmployeeDto storeToReturn = this._mapper.Map<EmployeeDto>(store);
+
+            return GetStore(storeToReturn.Rowguid);
         }
     }
 }

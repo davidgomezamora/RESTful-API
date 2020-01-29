@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Common.ResourceParameters
 {
-    public class StoreResourceParameters : ResourceParameters
+    public class EmployeeResourceParameters : ResourceParameters
     {
-        public DateTime? ModifiedDate { get; set; }
+        public DateTime? HireDate { get; set; }
     }
 }

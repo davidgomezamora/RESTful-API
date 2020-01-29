@@ -71,7 +71,7 @@ namespace WebAPI
              */
 
             // Establece el contexto de la base de datos y define la cadena de conexión establecida en el archivo appsettings.json
-            services.AddDbContext<AdventureWorks2017Context>(options => {
+            services.AddDbContext<NorthwindContext>(options => {
                 // ConnectionsString > ConnectionDatabase
                 options.UseSqlServer(this.Configuration.GetConnectionString("ConnectionDatabase"));
             });
@@ -93,14 +93,13 @@ namespace WebAPI
              *Contexto de la base de datos
              * Requiere del paquete Nuget: Microsoft.EntityFrameworkCore (Nuget.org), no es necesario instalarlo si se tiene instalado el paquete Repository (David Andrés Gómez Zamora)
              */
-            services.AddScoped(typeof(DbContext), typeof(AdventureWorks2017Context));
+            services.AddScoped(typeof(DbContext), typeof(NorthwindContext));
 
             /*
              * Servicios de la capa ApplicationCore
              * Requiere la dependencia con la capa ApplicationCore
              */
-            services.AddScoped(typeof(IStoreService), typeof(StoreService));
-            services.AddScoped(typeof(IBusinessEntityService), typeof(BusinessEntityService));
+            services.AddScoped(typeof(IEmployeeService), typeof(EmployeeService));
 
             /*
              * ---------------------------------------------------------

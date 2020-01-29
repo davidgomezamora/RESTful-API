@@ -8,9 +8,8 @@ namespace Common.DTO.Employee
 {
     public class EmployeeDto
     {
-        public int EmployeeId { get; set; }
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
+        public string EmployeeId { get; set; }
+        public string FullName { get; set; }
         public string Title { get; set; }
         public string TitleOfCourtesy { get; set; }
         public DateTime? BirthDate { get; set; }

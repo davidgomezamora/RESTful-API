@@ -8,22 +8,29 @@ using System.Linq;
 using Common.ResourceParameters;
 using Common.DTO.Employee;
 using System.Linq.Expressions;
+using Security;
+using Common.DTO.Order;
 
 namespace ApplicationCore.Services
 {
     public class EmployeeService : IEmployeeService
     {
         private readonly IRepository<Employees> _repository;
+        private readonly IDataSecurity _dataSecurity;
         private readonly IMapper _mapper;
 
         // Interfaz de servicios de entidades secundarias
 
         // Inyección de los servicios: Repository y Mapper
         public EmployeeService(IRepository<Employees> repository,
+            IDataSecurity dataSecurity,
             IMapper mapper)
         {
             this._repository = repository ??
                 throw new ArgumentNullException(nameof(repository));
+
+            this._dataSecurity = dataSecurity ??
+                throw new ArgumentNullException(nameof(dataSecurity));
 
             this._mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
@@ -32,7 +39,7 @@ namespace ApplicationCore.Services
         public List<EmployeeDto> GetEmployees(EmployeeResourceParameters employeeResourceParameters)
         {
             // Resuelve la solicitud de lista de resultados sin filtros
-            if (string.IsNullOrWhiteSpace(employeeResourceParameters.HireDate.ToString()) && string.IsNullOrWhiteSpace(employeeResourceParameters.SearchQuery))
+            if (string.IsNullOrWhiteSpace(employeeResourceParameters.HireDate.ToString()) && string.IsNullOrWhiteSpace(employeeResourceParameters.City) && string.IsNullOrWhiteSpace(employeeResourceParameters.SearchQuery))
             {
                 return this._mapper.Map<List<EmployeeDto>>(this._repository.GetList());
             }
@@ -40,13 +47,19 @@ namespace ApplicationCore.Services
             // QueryParameters para fitlrado y/o busqueda de resultados
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100);
 
-            // Resuelve el filtro
+            // Resuelve el filtro: HireDate
             if (!string.IsNullOrWhiteSpace(employeeResourceParameters.HireDate.ToString()))
             {
                 queryParameters.WhereList.Add(x => x.HireDate.Value.Date.Equals(employeeResourceParameters.HireDate.Value.Date));
             }
 
-            // Resuelve la busqueda
+            // Resuelve el filtro: City
+            if (!string.IsNullOrWhiteSpace(employeeResourceParameters.City))
+            {
+                queryParameters.WhereList.Add(x => x.City.Equals(employeeResourceParameters.City));
+            }
+
+            // Resuelve la busqueda: FullName => (FirstName + LastName)
             if (!string.IsNullOrWhiteSpace(employeeResourceParameters.SearchQuery))
             {
                 employeeResourceParameters.SearchQuery = employeeResourceParameters.SearchQuery.Trim();
@@ -58,11 +71,11 @@ namespace ApplicationCore.Services
             return this._mapper.Map<List<EmployeeDto>>(this._repository.FindBy(queryParameters));
         }
 
-        public EmployeeDto GetEmployee(Guid guid)
+        public EmployeeDto GetEmployee(string employeeId)
         {
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100);
 
-            queryParameters.Where = x => Guid.Parse(x.EmployeeId.ToString()) == guid;
+            queryParameters.Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId);
 
             return this._mapper.Map<EmployeeDto>(this._repository.FindBy(queryParameters).FirstOrDefault());
         }
@@ -72,34 +85,34 @@ namespace ApplicationCore.Services
             throw new NotImplementedException();
         }
 
-        /*public List<CustomerDto> GetCustomers(Guid guid)
+        public List<OrderDto> GetOrders(string employeeId)
         {
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100);
 
-            queryParameters.Where = x => x.Rowguid == guid;
-            queryParameters.PathRelatedEntities = new List<string>() { "Customer" };
+            queryParameters.Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId);
+            queryParameters.PathRelatedEntities = new List<string>() { "Orders" };
 
-            return this._mapper.Map<List<CustomerDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Customer).ToList());
+            return this._mapper.Map<List<OrderDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Orders).ToList());
+        }
+
+        /*public EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
+        {
+            BusinessEntityDto bussinessEntity = this._businessEntityService.GetBusinessEntity(employeeForAdditionDto.BusinessEntity);
+
+            if(bussinessEntity == null)
+            {
+                return null;
+            }
+
+            Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
+
+            // employee.BusinessEntityId = bussinessEntity.BusinessEntityId;
+
+            bool result = this._repository.Add(employee);
+
+            EmployeeDto employeeToReturn = this._mapper.Map<EmployeeDto>(employee);
+
+            return GetEmployee(Guid.Parse(employeeToReturn.EmployeeId.ToString());
         }*/
-
-                    /*public EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
-                    {
-                        BusinessEntityDto bussinessEntity = this._businessEntityService.GetBusinessEntity(employeeForAdditionDto.BusinessEntity);
-
-                        if(bussinessEntity == null)
-                        {
-                            return null;
-                        }
-
-                        Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
-
-                        // employee.BusinessEntityId = bussinessEntity.BusinessEntityId;
-
-                        bool result = this._repository.Add(employee);
-
-                        EmployeeDto employeeToReturn = this._mapper.Map<EmployeeDto>(employee);
-
-                        return GetEmployee(Guid.Parse(employeeToReturn.EmployeeId.ToString());
-                    }*/
                 }
             }

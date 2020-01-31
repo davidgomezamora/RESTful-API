@@ -6,6 +6,7 @@ namespace Common.ResourceParameters
 {
     public class EmployeeResourceParameters : ResourceParameters
     {
-        public DateTime? HireDate { get; set; }
+        public DateTime? HireDate{ get; set; }
+        public string City { get; set; }
     }
 }

@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Repository;
 using AutoMapper;
+using Security;
 
 namespace WebAPI
 {
@@ -88,6 +89,13 @@ namespace WebAPI
              * Agregar [using Repository;] en este archivo
              */
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+            /*
+             * Repositorio
+             * Requiere del paquete Nuget: Security (David Andrés Gómez Zamora)
+             * Agregar [using Security;] en este archivo
+             */
+            services.AddScoped(typeof(IDataSecurity), typeof(DataSecurity));
 
             /*
              *Contexto de la base de datos

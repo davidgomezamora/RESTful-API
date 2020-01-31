@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Services;
 using Common.DTO.Employee;
+using Common.DTO.Order;
 using Common.ResourceParameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,10 +47,10 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET]: .../api/employees/{rowguid}/
-        [HttpGet("{rowguid}")]
-        public ActionResult<EmployeeDto> GetEmployee(Guid rowguid)
+        [HttpGet("{employeeId}")]
+        public ActionResult<EmployeeDto> GetEmployee(string employeeId)
         {
-            EmployeeDto employeeDTO = this._employeeService.GetEmployee(rowguid);
+            EmployeeDto employeeDTO = this._employeeService.GetEmployee(employeeId);
 
             if(employeeDTO == null)
             {
@@ -60,18 +61,18 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET] .../api/employees/{rowguid}/customers/
-        /*[HttpGet("{rowguid}/customers")]
-        public ActionResult<IEnumerable<CustomerDto>> GetCustomersForEmployee(Guid rowguid)
+        [HttpGet("{employeeId}/orders")]
+        public ActionResult<IEnumerable<OrderDto>> GetCustomersForEmployee(string employeeId)
         {
-            List<CustomerDto> customerDtos = this._employeeService.GetCustomers(rowguid);
+            List<OrderDto> orderDtos = this._employeeService.GetOrders(employeeId);
 
-            if (customerDtos == null)
+            if (orderDtos == null)
             {
                 return NotFound();
             }
 
-            return Ok(customerDtos);
-        }*/
+            return Ok(orderDtos);
+        }
 
         [HttpPost]
         public ActionResult<EmployeeDto> AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)

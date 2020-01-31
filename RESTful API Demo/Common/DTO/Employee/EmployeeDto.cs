@@ -3,12 +3,29 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 
 namespace Common.DTO.Employee
 {
+    // [DataContract]
     public class EmployeeDto
     {
+        /*private readonly IDataSecurity _dataSecurity;
+        public EmployeeDto(IDataSecurity dataSecurity)
+        {
+            this._dataSecurity = dataSecurity ??
+                throw new ArgumentNullException(nameof(dataSecurity));
+        }*/
         public string EmployeeId { get; set; }
+
+        /*[JsonIgnore]
+        [XmlIgnore]
+        public string EmployeeId {
+            get { return this.Id; }
+            set { this.Id = value; }
+        }
+
+        public string Id { get; set; }*/
         public string FullName { get; set; }
         public string Title { get; set; }
         public string TitleOfCourtesy { get; set; }

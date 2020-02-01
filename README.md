@@ -13,3 +13,5 @@ To implement the template, it is necessary to rename the Visual Studio 2019 solu
   4. Rename the folder
   5. Open the WebAPI project file (.csproj) with a text editor
   6. Rename the <RootNamespace> tag to the name of the solution indicated in the second step.
+  7. From Visual Studio 2019, open WebAPI > Properties > launchSettings.json
+  8. Rename the launch url property, to the default endpoint to execute when the solution is compiled in a development environment

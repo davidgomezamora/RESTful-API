@@ -1,5 +1,4 @@
 ﻿using Infraestructure.Entities;
-using Repository;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +9,7 @@ using Common.DTO.Employee;
 using System.Linq.Expressions;
 using Security;
 using Common.DTO.Order;
+using Repository;
 
 namespace ApplicationCore.Services
 {
@@ -73,46 +73,35 @@ namespace ApplicationCore.Services
 
         public EmployeeDto GetEmployee(string employeeId)
         {
-            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100);
-
-            queryParameters.Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId);
+            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100)
+            {
+                Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId)
+            };
 
             return this._mapper.Map<EmployeeDto>(this._repository.FindBy(queryParameters).FirstOrDefault());
         }
 
-        public EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
-        {
-            throw new NotImplementedException();
-        }
-
         public List<OrderDto> GetOrders(string employeeId)
         {
-            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100);
-
-            queryParameters.Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId);
-            queryParameters.PathRelatedEntities = new List<string>() { "Orders" };
+            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100)
+            {
+                Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId),
+                PathRelatedEntities = new List<string>() { "Orders" }
+            };
 
             return this._mapper.Map<List<OrderDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Orders).ToList());
         }
 
-        /*public EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
+        public EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
         {
-            BusinessEntityDto bussinessEntity = this._businessEntityService.GetBusinessEntity(employeeForAdditionDto.BusinessEntity);
-
-            if(bussinessEntity == null)
-            {
-                return null;
-            }
-
             Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
 
-            // employee.BusinessEntityId = bussinessEntity.BusinessEntityId;
-
-            bool result = this._repository.Add(employee);
-
-            EmployeeDto employeeToReturn = this._mapper.Map<EmployeeDto>(employee);
-
-            return GetEmployee(Guid.Parse(employeeToReturn.EmployeeId.ToString());
-        }*/
-                }
+            if (this._repository.Add(employee))
+            {
+                return this._mapper.Map<EmployeeDto>(employee);
             }
+
+            return null;
+        }
+    }
+}

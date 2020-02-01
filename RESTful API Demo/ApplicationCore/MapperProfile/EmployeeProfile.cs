@@ -6,7 +6,7 @@ using Common.DTO.Employee;
 using Infraestructure.Entities;
 using Security;
 
-namespace Infraestructure.MapperProfile
+namespace ApplicationCore.MapperProfile
 {
     public class EmployeeProfile : Profile
     {

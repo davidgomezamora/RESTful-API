@@ -21,7 +21,7 @@ namespace ApplicationCore.Services
 
         // Interfaz de servicios de entidades secundarias
 
-        // Inyección de los servicios: Repository y Mapper
+        // Inyección de los servicios
         public EmployeeService(IRepository<Employees> repository,
             IDataSecurity dataSecurity,
             IMapper mapper)

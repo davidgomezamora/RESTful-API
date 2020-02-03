@@ -19,6 +19,10 @@ namespace ApplicationCore.MapperProfile
                 opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.CustomerId.ToString())))
                 .ForMember(dest => dest.EmployeeId,
                 opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.EmployeeId.ToString())));
+
+            CreateMap<OrderForAdditionDto, Orders>()
+                .ForMember(dest => dest.EmployeeId,
+                opt => opt.MapFrom(src => new DataSecurity().AESDescrypt(src.EmployeeId)));
         }
     }
 }

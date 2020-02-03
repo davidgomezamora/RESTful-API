@@ -46,7 +46,7 @@ namespace RESTful_API_Demo.Controllers
             return Ok(employeeDtos);
         }
 
-        // [GET]: .../api/employees/{rowguid}/
+        // [GET]: .../api/employees/{employeeId}/
         [HttpGet("{employeeId}")]
         public ActionResult<EmployeeDto> GetEmployee(string employeeId)
         {
@@ -60,9 +60,9 @@ namespace RESTful_API_Demo.Controllers
             return Ok(employeeDTO);
         }
 
-        // [GET] .../api/employees/{rowguid}/customers/
+        // [GET] .../api/employees/{employeeId}/orders/
         [HttpGet("{employeeId}/orders")]
-        public ActionResult<IEnumerable<OrderDto>> GetCustomersForEmployee(string employeeId)
+        public ActionResult<IEnumerable<OrderDto>> GetOrdersForEmployee(string employeeId)
         {
             List<OrderDto> orderDtos = this._employeeService.GetOrders(employeeId);
 

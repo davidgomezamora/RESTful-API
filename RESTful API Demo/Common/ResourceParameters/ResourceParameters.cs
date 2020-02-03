@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Common.ResourceParameters
 {
-    public class ResourceParameters
+    public abstract class ResourceParameters
     {
-        public string SearchQuery { get; set; }
+        public virtual string SearchQuery { get; set; }
     }
 }

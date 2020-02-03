@@ -74,6 +74,7 @@ namespace RESTful_API_Demo.Controllers
             return Ok(orderDtos);
         }
 
+        // [POST] .../api/employees/
         [HttpPost]
         public ActionResult<EmployeeDto> AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
         {

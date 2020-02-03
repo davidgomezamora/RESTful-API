@@ -103,5 +103,17 @@ namespace ApplicationCore.Services
 
             return null;
         }
+
+        public List<EmployeeDto> AddEmployees(List<EmployeeForAdditionDto> employeesForAdditionDto)
+        {
+            List<EmployeeDto> employeesDtos = new List<EmployeeDto>();
+
+            foreach (EmployeeForAdditionDto employeeForAdditionDto in employeesForAdditionDto)
+            {
+                employeesDtos.Add(AddEmployee(employeeForAdditionDto));
+            }
+
+            return employeesDtos;
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace ApplicationCore.Services
         EmployeeDto GetEmployee(string employeeId);
         List<OrderDto> GetOrders(string employeeId);
         EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto);
+        List<EmployeeDto> AddEmployees(List<EmployeeForAdditionDto> employeesForAdditionDto);
     }
 }

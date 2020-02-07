@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.Text;
 using Common.DTO.Employee;
 using Common.DTO.Order;
+using System.Threading.Tasks;
 
 namespace ApplicationCore.Services
 {
     public interface IEmployeeService
     {
-        List<EmployeeDto> GetEmployees(EmployeeResourceParameters employeeResourceParameters);
-        EmployeeDto GetEmployee(string employeeId);
-        List<OrderDto> GetOrders(string employeeId);
-        EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto);
-        List<EmployeeDto> AddEmployees(List<EmployeeForAdditionDto> employeesForAdditionDto);
+        Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
+        Task<EmployeeDto> GetEmployeeAsync(string employeeId);
+        Task<List<OrderDto>> GetOrdersAsync(string employeeId);
+        Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto);
+        Task<List<EmployeeDto>> AddEmployeesAsync(List<EmployeeForAdditionDto> employeesForAdditionDto);
     }
 }

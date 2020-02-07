@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Security;
 using Common.DTO.Order;
 using Repository;
+using System.Threading.Tasks;
 
 namespace ApplicationCore.Services
 {
@@ -36,12 +37,19 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        public List<EmployeeDto> GetEmployees(EmployeeResourceParameters employeeResourceParameters)
+        public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
         {
+            List<Employees> employees;
+
             // Resuelve la solicitud de lista de resultados sin filtros
             if (string.IsNullOrWhiteSpace(employeeResourceParameters.HireDate.ToString()) && string.IsNullOrWhiteSpace(employeeResourceParameters.City) && string.IsNullOrWhiteSpace(employeeResourceParameters.SearchQuery))
             {
-                return this._mapper.Map<List<EmployeeDto>>(this._repository.GetList());
+                employees = await Task.Run(() =>
+                {
+                    return this._repository.GetList();
+                });
+
+                return this._mapper.Map<List<EmployeeDto>>(employees);
             }
 
             // QueryParameters para fitlrado y/o busqueda de resultados
@@ -67,21 +75,32 @@ namespace ApplicationCore.Services
                 queryParameters.WhereList.Add(x => (x.FirstName + "" + x.LastName).Contains(employeeResourceParameters.SearchQuery));
             }
 
+            employees = await Task.Run(() =>
+            {
+                return this._repository.FindBy(queryParameters);
+            });
+
             // Retorna el resultado con filtro y/o busqueda
-            return this._mapper.Map<List<EmployeeDto>>(this._repository.FindBy(queryParameters));
+            return this._mapper.Map<List<EmployeeDto>>(employees);
         }
 
-        public EmployeeDto GetEmployee(string employeeId)
+        public async Task<EmployeeDto> GetEmployeeAsync(string employeeId)
         {
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100)
             {
                 Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId)
             };
 
-            return this._mapper.Map<EmployeeDto>(this._repository.FindBy(queryParameters).FirstOrDefault());
+            Employees employees = await Task.Run(() =>
+            {
+                return this._repository.FindBy(queryParameters).FirstOrDefault();
+            });
+
+
+            return this._mapper.Map<EmployeeDto>(employees);
         }
 
-        public List<OrderDto> GetOrders(string employeeId)
+        public async Task<List<OrderDto>> GetOrdersAsync(string employeeId)
         {
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100)
             {
@@ -89,14 +108,24 @@ namespace ApplicationCore.Services
                 PathRelatedEntities = new List<string>() { "Orders" }
             };
 
-            return this._mapper.Map<List<OrderDto>>(this._repository.FindBy(queryParameters).SelectMany(x => x.Orders).ToList());
+            List<Orders> orders = await Task.Run(() =>
+            {
+                return this._repository.FindBy(queryParameters).SelectMany(x => x.Orders).ToList();
+            });
+
+            return this._mapper.Map<List<OrderDto>>(orders);
         }
 
-        public EmployeeDto AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
+        public async Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
         {
             Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
 
-            if (this._repository.Add(employee))
+            bool result = await Task.Run(() =>
+            {
+                return this._repository.Add(employee);
+            });
+
+            if (result)
             {
                 return this._mapper.Map<EmployeeDto>(employee);
             }
@@ -104,13 +133,13 @@ namespace ApplicationCore.Services
             return null;
         }
 
-        public List<EmployeeDto> AddEmployees(List<EmployeeForAdditionDto> employeesForAdditionDto)
+        public async Task<List<EmployeeDto>> AddEmployeesAsync(List<EmployeeForAdditionDto> employeesForAdditionDto)
         {
             List<EmployeeDto> employeesDtos = new List<EmployeeDto>();
 
             foreach (EmployeeForAdditionDto employeeForAdditionDto in employeesForAdditionDto)
             {
-                employeesDtos.Add(AddEmployee(employeeForAdditionDto));
+                employeesDtos.Add(await AddEmployeeAsync(employeeForAdditionDto));
             }
 
             return employeesDtos;

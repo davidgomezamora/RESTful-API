@@ -34,9 +34,9 @@ namespace RESTful_API_Demo.Controllers
         // [GET]: .../api/employees?searchQuery={value}
         // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}
         [HttpGet]
-        public ActionResult<IEnumerable<EmployeeDto>> GetEmployees([FromQuery] EmployeeResourceParameters employeeResourceParameters)
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
         {
-            List<EmployeeDto> employeeDtos = this._employeeService.GetEmployees(employeeResourceParameters);
+            List<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
 
             if(employeeDtos.Count() == 0)
             {
@@ -48,9 +48,9 @@ namespace RESTful_API_Demo.Controllers
 
         // [GET]: .../api/employees/{employeeId}/
         [HttpGet("{employeeId}")]
-        public ActionResult<EmployeeDto> GetEmployee(string employeeId)
+        public async Task<ActionResult<EmployeeDto>> GetEmployeeAsync(string employeeId)
         {
-            EmployeeDto employeeDTO = this._employeeService.GetEmployee(employeeId);
+            EmployeeDto employeeDTO = await this._employeeService.GetEmployeeAsync(employeeId);
 
             if(employeeDTO == null)
             {
@@ -62,9 +62,9 @@ namespace RESTful_API_Demo.Controllers
 
         // [GET] .../api/employees/{employeeId}/orders/
         [HttpGet("{employeeId}/orders")]
-        public ActionResult<IEnumerable<OrderDto>> GetOrdersForEmployee(string employeeId)
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersForEmployeeAsync(string employeeId)
         {
-            List<OrderDto> orderDtos = this._employeeService.GetOrders(employeeId);
+            List<OrderDto> orderDtos = await this._employeeService.GetOrdersAsync(employeeId);
 
             if (orderDtos == null)
             {
@@ -76,9 +76,9 @@ namespace RESTful_API_Demo.Controllers
 
         // [POST] .../api/employees/
         [HttpPost]
-        public ActionResult<EmployeeDto> AddEmployee(EmployeeForAdditionDto employeeForAdditionDto)
+        public async Task<ActionResult<EmployeeDto>> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
         {
-            EmployeeDto employeeDto = this._employeeService.AddEmployee(employeeForAdditionDto);
+            EmployeeDto employeeDto = await this._employeeService.AddEmployeeAsync(employeeForAdditionDto);
 
             if(employeeDto == null)
             {

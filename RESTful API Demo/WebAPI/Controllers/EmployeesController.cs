@@ -94,5 +94,14 @@ namespace RESTful_API_Demo.Controllers
         {
             throw new Exception("This is a test exception.");
         }
+
+        // [OPTIONS]: .../api/employees/
+        [HttpOptions]
+        public IActionResult GetOptions()
+        {
+            Response.Headers.Add("Allow", "GET, POST, DELETE");
+
+            return Ok();
+        }
     }
 }

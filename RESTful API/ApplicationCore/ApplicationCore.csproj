@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Repository" Version="1.0.7" />
+    <PackageReference Include="Security" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>

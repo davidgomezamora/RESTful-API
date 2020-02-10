@@ -1,21 +1,16 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Repository;
 using AutoMapper;
+using Security;
+using Repository;
 
 namespace WebAPI
 {
@@ -53,6 +48,7 @@ namespace WebAPI
                     new XmlDataContractSerializerOutputFormatter());
             }).AddXmlDataContractSerializerFormatters();
 
+
             /*
              * Mapeo de entidades a DTOs
              * La capa Infraestructure requiere el paquete Nuget: AutoMapper.Extensions.Microsoft.DependencyInjection (Nuget.org)
@@ -68,13 +64,13 @@ namespace WebAPI
 
             // Establece el contexto de la base de datos y define la cadena de conexión establecida en el archivo appsettings.json
             /*services.AddDbContext<DatabaseContext>(options => {
-             * // ConnectionsString > ConnectionDatabase
+                // ConnectionsString > ConnectionDatabase
                 options.UseSqlServer(this.Configuration.GetConnectionString("ConnectionDatabase"));
             });*/
 
             /*
              * ---------------------------------------------------------
-             * Configuración de los ambitos de la aplicación
+             * Configuración de los ámbitos de la aplicación
              * ---------------------------------------------------------
              */
 
@@ -86,6 +82,13 @@ namespace WebAPI
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
             /*
+             * Repositorio
+             * Requiere del paquete Nuget: Security (David Andrés Gómez Zamora)
+             * Agregar [using Security;] en este archivo
+             */
+            services.AddScoped(typeof(IDataSecurity), typeof(DataSecurity));
+
+            /*
              *Contexto de la base de datos
              * Requiere del paquete Nuget: Microsoft.EntityFrameworkCore (Nuget.org), no es necesario instalarlo si se tiene instalado el paquete Repository (David Andrés Gómez Zamora)
              */
@@ -95,7 +98,7 @@ namespace WebAPI
              * Servicios de la capa ApplicationCore
              * Requiere la dependencia con la capa ApplicationCore
              */
-            // services.AddScoped(typeof(IBlogService), typeof(BlogService));
+            // services.AddScoped(typeof(IService), typeof(Service));
 
             /*
              * ---------------------------------------------------------
@@ -149,6 +152,7 @@ namespace WebAPI
         {
             if (env.IsDevelopment())
             {
+                // Define mostrar total detalle del error
                 app.UseDeveloperExceptionPage();
 
                 // Usa el CORS espesificado
@@ -156,7 +160,7 @@ namespace WebAPI
             } else
             {
                 // Definir mensaje de error cuando este sea un error inesperado del lado el servidor.
-                app.UseExceptionHandler(erroApi =>
+                app.UseExceptionHandler(erroApi => 
                 {
                     erroApi.Run(async context =>
                     {

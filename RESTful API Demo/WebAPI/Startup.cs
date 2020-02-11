@@ -41,7 +41,8 @@ namespace WebAPI
              * ---------------------------------------------------------
              */
 
-            services.AddControllers(options => {
+            services.AddControllers(options =>
+            {
                 // Definir en true si queremos que se retorne un código 406 Not Acceptable; cuando se solicite en la cabezera Accept, un formato no soportado
                 // Definir en false si queremos que se retorne la información en el formato por omición y no se entregue un código 406 Not Acceptable
                 options.ReturnHttpNotAcceptable = true;
@@ -56,6 +57,35 @@ namespace WebAPI
                 options.OutputFormatters.Add(
                     new XmlDataContractSerializerOutputFormatter());
             }).AddXmlDataContractSerializerFormatters();
+
+            /*
+             * ---------------------------------------------------------
+             * Configuración de mensajes de error
+             * ---------------------------------------------------------
+             */
+
+            // Error 422: Error en el modelo de datos de entrada
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    ValidationProblemDetails validationProblemDetails = new ValidationProblemDetails(context.ModelState)
+                    {
+                        // Type = "",
+                        Title = "One or more model validation errors ocurred.",
+                        Status = StatusCodes.Status422UnprocessableEntity,
+                        Detail = "See the errors property for details.",
+                        Instance = context.HttpContext.Request.Path
+                    };
+
+                    validationProblemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+                    return new UnprocessableEntityObjectResult(validationProblemDetails)
+                    {
+                        ContentTypes = { "application/problem+json" }
+                    };
+                };
+            });
 
 
             /*

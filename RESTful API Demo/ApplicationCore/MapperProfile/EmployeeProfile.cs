@@ -20,6 +20,7 @@ namespace ApplicationCore.MapperProfile
                 opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.EmployeeId.ToString())));
 
             CreateMap<EmployeeForAdditionDto, Employees>();
+            CreateMap<EmployeeForUpdateDto, Employees>();
         }
     }
 }

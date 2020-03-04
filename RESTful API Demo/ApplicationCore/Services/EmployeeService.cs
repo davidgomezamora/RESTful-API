@@ -37,6 +37,11 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(mapper));
         }
 
+        public async Task<Boolean> Exists(string employeeId)
+        {
+            return await this._repository.ExistsAsync(employeeId);
+        }
+
         public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
         {
             List<Employees> employees;
@@ -44,12 +49,7 @@ namespace ApplicationCore.Services
             // Resuelve la solicitud de lista de resultados sin filtros
             if (string.IsNullOrWhiteSpace(employeeResourceParameters.HireDate.ToString()) && string.IsNullOrWhiteSpace(employeeResourceParameters.City) && string.IsNullOrWhiteSpace(employeeResourceParameters.SearchQuery))
             {
-                employees = await Task.Run(() =>
-                {
-                    return this._repository.GetList();
-                });
-
-                return this._mapper.Map<List<EmployeeDto>>(employees);
+                return this._mapper.Map<List<EmployeeDto>>(await this._repository.GetListAsync());
             }
 
             // QueryParameters para fitlrado y/o busqueda de resultados
@@ -75,13 +75,8 @@ namespace ApplicationCore.Services
                 queryParameters.WhereList.Add(x => (x.FirstName + "" + x.LastName).Contains(employeeResourceParameters.SearchQuery));
             }
 
-            employees = await Task.Run(() =>
-            {
-                return this._repository.FindBy(queryParameters);
-            });
-
             // Retorna el resultado con filtro y/o busqueda
-            return this._mapper.Map<List<EmployeeDto>>(employees);
+            return this._mapper.Map<List<EmployeeDto>>(await this._repository.FindByAsync(queryParameters));
         }
 
         public async Task<EmployeeDto> GetEmployeeAsync(string employeeId)
@@ -91,16 +86,12 @@ namespace ApplicationCore.Services
                 Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId)
             };
 
-            Employees employees = await Task.Run(() =>
-            {
-                return this._repository.FindBy(queryParameters).FirstOrDefault();
-            });
+            List<Employees> employees = await this._repository.FindByAsync(queryParameters);
 
-
-            return this._mapper.Map<EmployeeDto>(employees);
+            return this._mapper.Map<EmployeeDto>(employees.FirstOrDefault());
         }
 
-        public async Task<List<OrderDto>> GetOrdersAsync(string employeeId)
+        public async Task<List<OrderDto>> GetOrdersForEmployeeAsync(string employeeId)
         {
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>(1, 100)
             {
@@ -108,22 +99,16 @@ namespace ApplicationCore.Services
                 PathRelatedEntities = new List<string>() { "Orders" }
             };
 
-            List<Orders> orders = await Task.Run(() =>
-            {
-                return this._repository.FindBy(queryParameters).SelectMany(x => x.Orders).ToList();
-            });
+            List<Employees> employees = await this._repository.FindByAsync(queryParameters);
 
-            return this._mapper.Map<List<OrderDto>>(orders);
+            return this._mapper.Map<List<OrderDto>>(employees.SelectMany(x => x.Orders).ToList());
         }
 
         public async Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
         {
             Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
 
-            bool result = await Task.Run(() =>
-            {
-                return this._repository.Add(employee);
-            });
+            bool result = await this._repository.AddAsync(employee);
 
             if (result)
             {
@@ -143,6 +128,22 @@ namespace ApplicationCore.Services
             }
 
             return employeesDtos;
+        }
+
+        public async Task<EmployeeDto> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            Employees employees = this._mapper.Map<Employees>(employeeForUpdateDto);
+
+            employees.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
+
+            bool result = await this._repository.UpdateAsync(employees);
+
+            if (result)
+            {
+                return this._mapper.Map<EmployeeDto>(employees);
+            }
+
+            return null;
         }
     }
 }

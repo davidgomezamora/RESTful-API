@@ -10,10 +10,12 @@ namespace ApplicationCore.Services
 {
     public interface IEmployeeService
     {
+        Task<Boolean> Exists(string employeeId);
         Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
         Task<EmployeeDto> GetEmployeeAsync(string employeeId);
-        Task<List<OrderDto>> GetOrdersAsync(string employeeId);
+        Task<List<OrderDto>> GetOrdersForEmployeeAsync(string employeeId);
         Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto);
         Task<List<EmployeeDto>> AddEmployeesAsync(List<EmployeeForAdditionDto> employeesForAdditionDto);
+        Task<EmployeeDto> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto);
     }
 }

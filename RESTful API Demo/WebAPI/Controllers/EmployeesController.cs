@@ -64,7 +64,7 @@ namespace RESTful_API_Demo.Controllers
         [HttpGet("{employeeId}/orders")]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersForEmployeeAsync(string employeeId)
         {
-            List<OrderDto> orderDtos = await this._employeeService.GetOrdersAsync(employeeId);
+            List<OrderDto> orderDtos = await this._employeeService.GetOrdersForEmployeeAsync(employeeId);
 
             if (orderDtos == null)
             {
@@ -99,8 +99,29 @@ namespace RESTful_API_Demo.Controllers
         [HttpOptions]
         public IActionResult GetOptions()
         {
-            Response.Headers.Add("Allow", "GET, POST, DELETE");
+            Response.Headers.Add("Allow", "GET, POST, PUT, PATHC, DELETE");
 
+            return Ok();
+        }
+
+        // [PUT]: .../api/employees/{employeeId}/
+        [HttpPut("{employeeId}")]
+        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            EmployeeDto employeeDto = await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
+
+            if (employeeDto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(employeeDto);
+        }
+
+        // [PUT]: .../api/employees/{employeeId}/orders/{orderId}
+        [HttpPut("{employeeId}/orders/{orderId}")]
+        public ActionResult UpdateOrderForEmployeeAsync(string employeeId, string orderId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
             return Ok();
         }
     }

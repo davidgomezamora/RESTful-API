@@ -108,21 +108,19 @@ namespace RESTful_API_Demo.Controllers
         [HttpPut("{employeeId}")]
         public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
         {
-            EmployeeDto employeeDto = await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
-
-            if (employeeDto == null)
+            if (!await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
             {
                 return NotFound();
             }
 
-            return Ok(employeeDto);
+            return NoContent();
         }
 
         // [PUT]: .../api/employees/{employeeId}/orders/{orderId}
         [HttpPut("{employeeId}/orders/{orderId}")]
         public ActionResult UpdateOrderForEmployeeAsync(string employeeId, string orderId, EmployeeForUpdateDto employeeForUpdateDto)
         {
-            return Ok();
+            return NotFound();
         }
     }
 }

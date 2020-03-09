@@ -130,20 +130,13 @@ namespace ApplicationCore.Services
             return employeesDtos;
         }
 
-        public async Task<EmployeeDto> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        public async Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
         {
             Employees employees = this._mapper.Map<Employees>(employeeForUpdateDto);
 
             employees.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
 
-            bool result = await this._repository.UpdateAsync(employees);
-
-            if (result)
-            {
-                return this._mapper.Map<EmployeeDto>(employees);
-            }
-
-            return null;
+            return await this._repository.UpdateAsync(employees);
         }
     }
 }

@@ -6,13 +6,13 @@ using System.Text;
 
 namespace Common.ValidationAttributes
 {
-    public class EmployeeForUpdateValidation : ValidationAttribute
+    public class EmployeeForManipulationValidation : ValidationAttribute
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            EmployeeForUpdateDto employeeForUpdateDto = (EmployeeForUpdateDto)validationContext.ObjectInstance;
+            EmployeeForManipulationDto employeeForManipulationDto = (EmployeeForManipulationDto)validationContext.ObjectInstance;
 
-            if (employeeForUpdateDto.FirstName.Equals(employeeForUpdateDto.LastName))
+            if (employeeForManipulationDto.FirstName.Equals(employeeForManipulationDto.LastName))
             {
                 return new ValidationResult(
                     "The provided first name should be different from the last name",

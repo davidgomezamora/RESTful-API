@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Repository" Version="1.0.8" />
+    <PackageReference Include="Repository" Version="1.0.9" />
     <PackageReference Include="Security" Version="1.0.3" />
   </ItemGroup>
 

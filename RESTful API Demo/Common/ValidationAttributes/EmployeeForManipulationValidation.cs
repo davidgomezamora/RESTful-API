@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Common.ValidationAttributes
 {
@@ -16,6 +17,13 @@ namespace Common.ValidationAttributes
             {
                 return new ValidationResult(
                     "The provided first name should be different from the last name",
+                    new[] { this.GetType().Name });
+            }
+
+            if (!String.IsNullOrEmpty(employeeForManipulationDto.HomePhone) && !Regex.IsMatch(employeeForManipulationDto.HomePhone, @"^\([0-9]{3}\)\s[0-9]{3}\-[0-9]{3,15}$"))
+            {
+                return new ValidationResult(
+                    "The home phone provided must be in the format (000) 000-000 ...",
                     new[] { this.GetType().Name });
             }
 

@@ -30,7 +30,7 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET] .../api/employeesCollection/(id,id,id...)
-        [HttpGet("({ids})")]
+        [HttpGet("({ids})", Name = "GetEmployeesCollectionAsync")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployeesCollectionAsync(
             [FromRoute]
             [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
@@ -66,7 +66,9 @@ namespace RESTful_API_Demo.Controllers
                 return NotFound();
             }
 
-            return Ok(employeesDto);
+            var idsEmployees = String.Join(",", employeesDto.Select(x => x.EmployeeId));
+
+            return CreatedAtRoute("GetEmployeesCollectionAsync", new { ids = idsEmployees }, employeesDto);
         }
     }
 }

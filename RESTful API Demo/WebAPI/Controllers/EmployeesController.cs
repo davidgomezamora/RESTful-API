@@ -25,7 +25,7 @@ namespace RESTful_API_Demo.Controllers
         // Inyección del servicio de la capa ApplicationCore
         public EmployeesController(IEmployeeService employeeService)
         {
-            this._employeeService = employeeService  ??
+            this._employeeService = employeeService ??
                 throw new ArgumentNullException(nameof(employeeService));
         }
 
@@ -33,12 +33,14 @@ namespace RESTful_API_Demo.Controllers
         // [GET]: .../api/employees?modifiedDate={value}
         // [GET]: .../api/employees?searchQuery={value}
         // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}
+        // [GET]: .../api/employees?pageSize={value}&pageNumber={value}
+        // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}&pageSize={value}&pageNumber={value}
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
         {
             List<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
 
-            if(employeeDtos.Count() == 0)
+            if (employeeDtos.Count() == 0)
             {
                 return NoContent();
             }
@@ -47,12 +49,12 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET]: .../api/employees/{employeeId}/
-        [HttpGet("{employeeId}")]
+        [HttpGet("{employeeId}", Name = "GetEmployeeAsync")]
         public async Task<ActionResult<EmployeeDto>> GetEmployeeAsync(string employeeId)
         {
             EmployeeDto employeeDTO = await this._employeeService.GetEmployeeAsync(employeeId);
 
-            if(employeeDTO == null)
+            if (employeeDTO == null)
             {
                 return NotFound();
             }
@@ -64,7 +66,7 @@ namespace RESTful_API_Demo.Controllers
         [HttpGet("{employeeId}/orders")]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersForEmployeeAsync(string employeeId)
         {
-            List<OrderDto> orderDtos = await this._employeeService.GetOrdersForEmployeeAsync(employeeId);
+            List<OrderDto> orderDtos = await this._employeeService.GetOrdersAsync(employeeId);
 
             if (orderDtos == null)
             {
@@ -80,12 +82,12 @@ namespace RESTful_API_Demo.Controllers
         {
             EmployeeDto employeeDto = await this._employeeService.AddEmployeeAsync(employeeForAdditionDto);
 
-            if(employeeDto == null)
+            if (employeeDto == null)
             {
                 return NotFound();
             }
 
-            return Ok(employeeDto);
+            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
         }
 
         // [GET]: .../api/employees/error/
@@ -99,28 +101,55 @@ namespace RESTful_API_Demo.Controllers
         [HttpOptions]
         public IActionResult GetOptions()
         {
-            Response.Headers.Add("Allow", "GET, POST, PUT, PATHC, DELETE");
+            Response.Headers.Add("Allow", "GET, POST, DELETE, PUT, PATCH");
 
             return Ok();
         }
 
-        // [PUT]: .../api/employees/{employeeId}/
-        [HttpPut("{employeeId}")]
-        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        // [PATCH]: .../api/employees/{employeeId}/
+        [HttpPatch("{employeeId}")]
+        public async Task<ActionResult> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
         {
-            if (!await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
+            if (await this._employeeService.ExistsAsync(employeeId))
+            {
+                if (await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
+                {
+                    return NoContent();
+                }
+            }
+
+            return NotFound();
+
+        }
+
+        // [PUT]: .../api/employees/{employeeId}/
+        /*[HttpPut("{employeeId}")]
+        public async Task<ActionResult> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            if (await this._employeeService.ExistsAsync(employeeId))
+            {
+                if(await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
+                {
+                    return Ok();
+                } else
+                {
+                    return NotFound();
+                }
+
+            } else
             {
                 return NotFound();
             }
+        }*/
 
-            return NoContent();
-        }
-
-        // [PUT]: .../api/employees/{employeeId}/orders/{orderId}
-        [HttpPut("{employeeId}/orders/{orderId}")]
-        public ActionResult UpdateOrderForEmployeeAsync(string employeeId, string orderId, EmployeeForUpdateDto employeeForUpdateDto)
+        // [PUT]: .../api/employees/{employeeId}/
+        /*[HttpPut("{employeeId}/orders/{ordersId}")]
+        public async Task<ActionResult> UpdateOrdersForEmployeeAsync(string employeeId, string ordersId)
         {
-            return NotFound();
-        }
+            return await Task.Run(() =>
+            {
+                return Ok();
+            });
+        }*/
     }
 }

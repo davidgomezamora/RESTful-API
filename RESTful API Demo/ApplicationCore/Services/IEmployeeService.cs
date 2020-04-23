@@ -17,6 +17,7 @@ namespace ApplicationCore.Services
         Task<List<EmployeeDto>> AddEmployeesAsync(List<EmployeeForAdditionDto> employeesForAdditionDto);
         Task<Boolean> ExistsAsync(string employeeId);
         Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto);
+        Task<EmployeeDto> UpsertingEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto);
         // Task<Boolean> UpdateOrderAsync(string employeeId, string orderId);
     }
 }

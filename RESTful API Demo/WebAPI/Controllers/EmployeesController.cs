@@ -106,8 +106,8 @@ namespace RESTful_API_Demo.Controllers
             return Ok();
         }
 
-        // [PATCH]: .../api/employees/{employeeId}/
-        [HttpPatch("{employeeId}")]
+        // [PUT]: .../api/employees/{employeeId}/
+        [HttpPut("{employeeId}")]
         public async Task<ActionResult> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
         {
             if (await this._employeeService.ExistsAsync(employeeId))
@@ -118,29 +118,16 @@ namespace RESTful_API_Demo.Controllers
                 }
             }
 
-            return NotFound();
+            // Upserting
+            EmployeeDto employeeDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, employeeForUpdateDto);
 
-        }
-
-        // [PUT]: .../api/employees/{employeeId}/
-        /*[HttpPut("{employeeId}")]
-        public async Task<ActionResult> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                if(await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
-                {
-                    return Ok();
-                } else
-                {
-                    return NotFound();
-                }
-
-            } else
+            if (employeeDto == null)
             {
                 return NotFound();
             }
-        }*/
+
+            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
+        }
 
         // [PUT]: .../api/employees/{employeeId}/
         /*[HttpPut("{employeeId}/orders/{ordersId}")]
@@ -151,5 +138,20 @@ namespace RESTful_API_Demo.Controllers
                 return Ok();
             });
         }*/
+
+        // [PATCH]: .../api/employees/{employeeId}/
+        [HttpPatch("{employeeId}")]
+        public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            if (await this._employeeService.ExistsAsync(employeeId))
+            {
+                if (await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
+                {
+                    return NoContent();
+                }
+            }
+
+            return NotFound();
+        }
     }
 }

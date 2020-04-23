@@ -122,12 +122,27 @@ namespace ApplicationCore.Services
             return this._repository.ExistsAsync(employeeId);
         }
 
-        public Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        public async Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
         {
-            Employees employees = this._mapper.Map<Employees>(employeeForUpdateDto);
-            employees.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
+            Employees employee = this._mapper.Map<Employees>(employeeForUpdateDto);
+            employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
 
-            return this._repository.UpdateAsync(employees);
+            return await this._repository.UpdateAsync(employee);
+        }
+
+        public async Task<EmployeeDto> UpsertingEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            Employees employee = this._mapper.Map<Employees>(employeeForUpdateDto);
+            employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
+
+            bool result = await this._repository.AddAsync(employee);
+
+            if (result)
+            {
+                return this._mapper.Map<EmployeeDto>(employee);
+            }
+
+            return null;
         }
     }
 }

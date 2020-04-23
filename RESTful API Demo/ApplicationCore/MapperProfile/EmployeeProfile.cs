@@ -18,6 +18,8 @@ namespace ApplicationCore.MapperProfile
                 opt => opt.MapFrom(src => src.FirstName + " " + src.LastName))
                 .ForMember(dest => dest.EmployeeId,
                 opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.EmployeeId.ToString())));
+            CreateMap<Employees, EmployeeForUpdateDto>();
+            CreateMap<Employees, EmployeeForAdditionDto>();
 
             CreateMap<EmployeeForAdditionDto, Employees>();
             CreateMap<EmployeeForUpdateDto, Employees>();

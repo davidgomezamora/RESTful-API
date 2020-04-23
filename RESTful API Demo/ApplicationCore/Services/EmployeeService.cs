@@ -11,6 +11,7 @@ using Security;
 using Common.DTO.Order;
 using Repository;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace ApplicationCore.Services
 {
@@ -71,12 +72,7 @@ namespace ApplicationCore.Services
 
         public async Task<EmployeeDto> GetEmployeeAsync(string employeeId)
         {
-            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>()
-            {
-                Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId)
-            };
-
-            return this._mapper.Map<EmployeeDto>((await this._repository.FindByAsync(queryParameters)).FirstOrDefault());
+            return this._mapper.Map<EmployeeDto>(await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId))));
         }
 
         public async Task<List<OrderDto>> GetOrdersAsync(string employeeId)
@@ -94,9 +90,7 @@ namespace ApplicationCore.Services
         {
             Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
 
-            bool result = await this._repository.AddAsync(employee);
-
-            if (result)
+            if (await this._repository.AddAsync(employee))
             {
                 return this._mapper.Map<EmployeeDto>(employee);
             }
@@ -135,14 +129,24 @@ namespace ApplicationCore.Services
             Employees employee = this._mapper.Map<Employees>(employeeForUpdateDto);
             employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
 
-            bool result = await this._repository.AddAsync(employee);
+            EmployeeForAdditionDto employeeForAdditionDto = this._mapper.Map<EmployeeForAdditionDto>(employee);
 
-            if (result)
+            return await this.AddEmployeeAsync(employeeForAdditionDto);
+        }
+
+        public async Task<Boolean> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        {
+            Employees employee = await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
+
+            if (employee != null)
             {
-                return this._mapper.Map<EmployeeDto>(employee);
+                EmployeeForUpdateDto employeeForUpdateDto = this._mapper.Map<EmployeeForUpdateDto>(employee);
+                jsonPatchDocument.ApplyTo(employeeForUpdateDto);
+
+                return await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
             }
 
-            return null;
+            return false;
         }
     }
 }

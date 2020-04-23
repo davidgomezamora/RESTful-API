@@ -5,6 +5,7 @@ using System.Text;
 using Common.DTO.Employee;
 using Common.DTO.Order;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace ApplicationCore.Services
 {
@@ -18,6 +19,6 @@ namespace ApplicationCore.Services
         Task<Boolean> ExistsAsync(string employeeId);
         Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto);
         Task<EmployeeDto> UpsertingEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto);
-        // Task<Boolean> UpdateOrderAsync(string employeeId, string orderId);
+        Task<Boolean> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument);
     }
 }

@@ -7,6 +7,7 @@ using Common.DTO.Employee;
 using Common.DTO.Order;
 using Common.ResourceParameters;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace RESTful_API_Demo.Controllers
@@ -108,7 +109,7 @@ namespace RESTful_API_Demo.Controllers
 
         // [PUT]: .../api/employees/{employeeId}/
         [HttpPut("{employeeId}")]
-        public async Task<ActionResult> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
         {
             if (await this._employeeService.ExistsAsync(employeeId))
             {
@@ -129,6 +130,18 @@ namespace RESTful_API_Demo.Controllers
             return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
         }
 
+        // [PATCH]: .../api/employees/{employeeId}/
+        [HttpPatch("{employeeId}")]
+        public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        {
+            if (await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument))
+            {
+                return NoContent();
+            }
+
+            return NotFound();
+        }
+
         // [PUT]: .../api/employees/{employeeId}/
         /*[HttpPut("{employeeId}/orders/{ordersId}")]
         public async Task<ActionResult> UpdateOrdersForEmployeeAsync(string employeeId, string ordersId)
@@ -140,18 +153,5 @@ namespace RESTful_API_Demo.Controllers
         }*/
 
         // [PATCH]: .../api/employees/{employeeId}/
-        [HttpPatch("{employeeId}")]
-        public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                if (await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
-                {
-                    return NoContent();
-                }
-            }
-
-            return NotFound();
-        }
     }
 }

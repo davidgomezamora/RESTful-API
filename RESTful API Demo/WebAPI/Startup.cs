@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Security;
 using Repository;
+using Newtonsoft.Json.Serialization;
 
 namespace WebAPI
 {
@@ -56,7 +57,12 @@ namespace WebAPI
                 // Adiciona soporte al formato XML; como serialización de retorno de datos, por parte del controlador/web API
                 options.OutputFormatters.Add(
                     new XmlDataContractSerializerOutputFormatter());
-            }).AddXmlDataContractSerializerFormatters();
+            }).AddXmlDataContractSerializerFormatters()
+            // Adiciona soporte para resolver propiedades en formato CamelCase, neceario para als operaciones PATCH
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
 
             /*
              * ---------------------------------------------------------

@@ -12,6 +12,10 @@ using Common.DTO.Order;
 using Repository;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
 
 namespace ApplicationCore.Services
 {
@@ -134,7 +138,7 @@ namespace ApplicationCore.Services
             return await this.AddEmployeeAsync(employeeForAdditionDto);
         }
 
-        public async Task<Boolean> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        public async Task<List<ValidationResult>> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
         {
             Employees employee = await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
 
@@ -143,10 +147,18 @@ namespace ApplicationCore.Services
                 EmployeeForUpdateDto employeeForUpdateDto = this._mapper.Map<EmployeeForUpdateDto>(employee);
                 jsonPatchDocument.ApplyTo(employeeForUpdateDto);
 
-                return await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
+                ValidationContext validationContext= new ValidationContext(employeeForUpdateDto);
+                List<ValidationResult> validationResults = new List<ValidationResult>();
+
+                if (Validator.TryValidateObject(employeeForUpdateDto, validationContext, validationResults))
+                {
+                    await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
+                }
+
+                return validationResults;
             }
 
-            return false;
+            return null;
         }
     }
 }

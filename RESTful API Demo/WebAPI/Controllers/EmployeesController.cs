@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Services;
@@ -9,6 +10,7 @@ using Common.ResourceParameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace RESTful_API_Demo.Controllers
 {
@@ -134,9 +136,22 @@ namespace RESTful_API_Demo.Controllers
         [HttpPatch("{employeeId}")]
         public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
         {
-            if (await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument))
+            List<ValidationResult> validationResults = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
+
+            if (validationResults != null)
             {
-                return NoContent();
+                if (validationResults.Count() > 0)
+                {
+                    foreach (ValidationResult validationResult in validationResults)
+                    {
+                        ModelState.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
+                    }
+
+                    return ValidationProblem(ModelState);
+                } else
+                {
+                    return NoContent(); 
+                }
             }
 
             return NotFound();

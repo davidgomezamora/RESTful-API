@@ -138,14 +138,18 @@ namespace ApplicationCore.Services
             return await this.AddEmployeeAsync(employeeForAdditionDto);
         }
 
-        public async Task<List<ValidationResult>> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        public async Task<ModelStateDictionary> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
         {
             Employees employee = await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
 
             if (employee != null)
             {
                 EmployeeForUpdateDto employeeForUpdateDto = this._mapper.Map<EmployeeForUpdateDto>(employee);
-                jsonPatchDocument.ApplyTo(employeeForUpdateDto);
+
+                this._repository.DetachedEntity(employee);
+
+                ModelStateDictionary modelStateDictionary = new ModelStateDictionary();
+                jsonPatchDocument.ApplyTo(employeeForUpdateDto, modelStateDictionary);
 
                 ValidationContext validationContext= new ValidationContext(employeeForUpdateDto);
                 List<ValidationResult> validationResults = new List<ValidationResult>();
@@ -155,7 +159,12 @@ namespace ApplicationCore.Services
                     await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
                 }
 
-                return validationResults;
+                foreach (ValidationResult validationResult in validationResults)
+                {
+                    modelStateDictionary.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
+                }
+
+                return modelStateDictionary;
             }
 
             return null;

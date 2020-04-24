@@ -136,22 +136,18 @@ namespace RESTful_API_Demo.Controllers
         [HttpPatch("{employeeId}")]
         public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
         {
-            List<ValidationResult> validationResults = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
+            ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
 
-            if (validationResults != null)
+            if (modelStateDictionary != null)
             {
-                if (validationResults.Count() > 0)
-                {
-                    foreach (ValidationResult validationResult in validationResults)
-                    {
-                        ModelState.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
-                    }
+                ModelState.Merge(modelStateDictionary);
 
-                    return ValidationProblem(ModelState);
-                } else
+                if (!ModelState.IsValid)
                 {
-                    return NoContent(); 
+                    return ValidationProblem(ModelState);
                 }
+
+                return NoContent(); 
             }
 
             return NotFound();

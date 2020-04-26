@@ -19,18 +19,20 @@ using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContex
 
 namespace ApplicationCore.Services
 {
-    public class EmployeeService : IEmployeeService
+    public class EmployeeService : DatabaseService<Employees>, IEmployeeService
     {
-        private readonly IRepository<Employees> _repository;
+        //private readonly IRepository<Employees> _repository;
         private readonly IDataSecurity _dataSecurity;
-        private readonly IMapper _mapper;
+        //private readonly IMapper _mapper;*/
+        // private readonly IDatabaseService<Employees> _databaseService;
 
         // Interfaz de servicios de entidades secundarias
 
         // Inyección de los servicios
         public EmployeeService(IRepository<Employees> repository,
             IDataSecurity dataSecurity,
-            IMapper mapper)
+            IMapper mapper/*,
+            IDatabaseService<Employees> databaseService*/)
         {
             this._repository = repository ??
                 throw new ArgumentNullException(nameof(repository));
@@ -40,6 +42,9 @@ namespace ApplicationCore.Services
 
             this._mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+
+            /*this._databaseService = databaseService ??
+                throw new ArgumentNullException(nameof(databaseService));*/
         }
 
         public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
@@ -76,6 +81,7 @@ namespace ApplicationCore.Services
 
         public async Task<EmployeeDto> GetEmployeeAsync(string employeeId)
         {
+            // return await this._databaseService.GetAsync<EmployeeDto>(employeeId);
             return this._mapper.Map<EmployeeDto>(await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId))));
         }
 
@@ -90,7 +96,7 @@ namespace ApplicationCore.Services
             return this._mapper.Map<List<OrderDto>>((await this._repository.FindByAsync(queryParameters)).SelectMany(x => x.Orders).ToList());
         }
 
-        public async Task<EmployeeDto> AddEmployeeAsync(string employeeId, EmployeeForAdditionDto employeeForAdditionDto)
+        private async Task<EmployeeDto> AddEmployeeAsync(string employeeId, EmployeeForAdditionDto employeeForAdditionDto)
         {
             Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
             employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
@@ -128,9 +134,9 @@ namespace ApplicationCore.Services
             return employeesDtos;
         }
 
-        public Task<Boolean> ExistsAsync(string employeeId)
+        public async Task<Boolean> ExistsAsync(string employeeId)
         {
-            return this._repository.ExistsAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
+            return await this._repository.ExistsAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
         }
 
         public async Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)

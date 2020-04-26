@@ -144,6 +144,7 @@ namespace WebAPI
              * Requiere la dependencia con la capa ApplicationCore
              */
             services.AddScoped(typeof(IEmployeeService), typeof(EmployeeService));
+            // services.AddScoped(typeof(IDatabaseService<>), typeof(DatabaseService<>));
 
             /*
              * ---------------------------------------------------------

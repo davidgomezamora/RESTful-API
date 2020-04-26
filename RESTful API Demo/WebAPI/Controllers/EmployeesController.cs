@@ -58,7 +58,8 @@ namespace RESTful_API_Demo.Controllers
         [HttpGet("{employeeId}", Name = "GetEmployeeAsync")]
         public async Task<ActionResult<EmployeeDto>> GetEmployeeAsync(string employeeId)
         {
-            EmployeeDto employeeDTO = await this._employeeService.GetEmployeeAsync(employeeId);
+            // EmployeeDto employeeDTO = await this._employeeService.GetEmployeeAsync(employeeId);
+            EmployeeDto employeeDTO = await this._employeeService.GetAsync<EmployeeDto>(employeeId);
 
             if (employeeDTO == null)
             {
@@ -86,7 +87,93 @@ namespace RESTful_API_Demo.Controllers
         [HttpPost]
         public async Task<ActionResult<EmployeeDto>> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
         {
-            EmployeeDto employeeDto = await this._employeeService.AddEmployeeAsync(employeeForAdditionDto);
+            //EmployeeDto employeeDto = await this._employeeService.AddEmployeeAsync(employeeForAdditionDto);
+            EmployeeDto employeeDto = await this._employeeService.AddAsync<EmployeeDto>(employeeForAdditionDto);
+
+            if (employeeDto == null)
+            {
+                return NotFound();
+            }
+
+            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
+        }
+
+        // [PUT]: .../api/employees/{employeeId}/
+        [HttpPut("{employeeId}")]
+        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            if (await this._employeeService.ExistsAsync(employeeId))
+            {
+                //if (await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
+                if (await this._employeeService.UpdateAsync(employeeId, employeeForUpdateDto))
+                {
+                    return NoContent();
+                }
+
+                // 304 (Not Modified)
+                return StatusCode(304);
+            }
+
+            // Upserting
+            //EmployeeDto employeeDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, employeeForUpdateDto);
+            EmployeeDto employeeDto = await this._employeeService.UpsertingAsync<EmployeeDto, EmployeeForAdditionDto>(employeeId, employeeForUpdateDto);
+
+            if (employeeDto == null)
+            {
+                return NotFound();
+            }
+
+            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
+        }
+
+        // [PATCH]: .../api/employees/{employeeId}/
+        [HttpPatch("{employeeId}")]
+        public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        {
+            if (await this._employeeService.ExistsAsync(employeeId))
+            {
+                //ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
+                ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateAsync<EmployeeForUpdateDto>(employeeId, jsonPatchDocument);
+
+                if (modelStateDictionary != null)
+                {
+                    ModelState.Merge(modelStateDictionary);
+
+                    if (!ModelState.IsValid)
+                    {
+                        return ValidationProblem(ModelState);
+                    }
+
+                    return NoContent(); 
+                }
+
+                // 304 (Not Modified)
+                return StatusCode(304);
+            }
+
+            // Upserting
+            /*EmployeeForUpsertingDto employeeForUpsertingDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, jsonPatchDocument);
+
+            ModelState.Merge(employeeForUpsertingDto.ModelStateDictionary);
+
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            if (employeeForUpsertingDto.EmployeeDto == null)
+            {
+                return NotFound();
+            }
+
+            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeForUpsertingDto.EmployeeDto.EmployeeId }, employeeForUpsertingDto.EmployeeDto);*/
+
+            EmployeeDto employeeDto = await this._employeeService.UpsertingAsync<EmployeeDto, EmployeeForUpdateDto, EmployeeForAdditionDto>(employeeId, jsonPatchDocument, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
 
             if (employeeDto == null)
             {
@@ -111,86 +198,6 @@ namespace RESTful_API_Demo.Controllers
 
             return Ok();
         }
-
-        // [PUT]: .../api/employees/{employeeId}/
-        [HttpPut("{employeeId}")]
-        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                if (await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
-                {
-                    return NoContent();
-                }
-
-                // 304 (Not Modified)
-                return StatusCode(304);
-            }
-
-            // Upserting
-            EmployeeDto employeeDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, employeeForUpdateDto);
-
-            if (employeeDto == null)
-            {
-                return NotFound();
-            }
-
-            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
-        }
-
-        // [PATCH]: .../api/employees/{employeeId}/
-        [HttpPatch("{employeeId}")]
-        public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
-
-                if (modelStateDictionary != null)
-                {
-                    ModelState.Merge(modelStateDictionary);
-
-                    if (!ModelState.IsValid)
-                    {
-                        return ValidationProblem(ModelState);
-                    }
-
-                    return NoContent(); 
-                }
-
-                // 304 (Not Modified)
-                return StatusCode(304);
-            }
-
-            // Upserting
-            EmployeeForUpsertingDto employeeForUpsertingDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, jsonPatchDocument);
-
-            ModelState.Merge(employeeForUpsertingDto.ModelStateDictionary);
-
-            if (!ModelState.IsValid)
-            {
-                return ValidationProblem(ModelState);
-            }
-
-            if (employeeForUpsertingDto.EmployeeDto == null)
-            {
-                return NotFound();
-            }
-
-            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeForUpsertingDto.EmployeeDto.EmployeeId }, employeeForUpsertingDto.EmployeeDto);
-        }
-
-        // [PUT]: .../api/employees/{employeeId}/
-        /*[HttpPut("{employeeId}/orders/{ordersId}")]
-        public async Task<ActionResult> UpdateOrdersForEmployeeAsync(string employeeId, string ordersId)
-        {
-            return await Task.Run(() =>
-            {
-                return Ok();
-            });
-        }*/
-
-        // [PATCH]: .../api/employees/{employeeId}/
 
         /*
          * Se hace override del método ValidationProblem, para que la respuesta no sea un 400 Bad Request sino un 422 Unprocessable Entity y

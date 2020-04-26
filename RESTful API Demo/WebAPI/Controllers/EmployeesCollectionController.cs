@@ -44,7 +44,8 @@ namespace RESTful_API_Demo.Controllers
 
             foreach (string id in ids)
             {
-                employeeDtos.Add(await this._employeeService.GetEmployeeAsync(id));
+                //employeeDtos.Add(await this._employeeService.GetEmployeeAsync(id));
+                employeeDtos.Add(await this._employeeService.GetAsync<EmployeeDto>(id));
             }
 
             if (!ids.Count().Equals(employeeDtos.Count()))
@@ -59,7 +60,7 @@ namespace RESTful_API_Demo.Controllers
         [HttpPost]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> AddEmployeesCollectionAsync(List<EmployeeForAdditionDto> employeesForAdditionDto)
         {
-            List<EmployeeDto> employeesDto = await this._employeeService.AddEmployeesAsync(employeesForAdditionDto);
+            List<EmployeeDto> employeesDto = await this._employeeService.AddAsync<EmployeeDto, EmployeeForAdditionDto>(employeesForAdditionDto);
 
             if (employeesDto == null)
             {

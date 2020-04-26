@@ -90,6 +90,19 @@ namespace ApplicationCore.Services
             return this._mapper.Map<List<OrderDto>>((await this._repository.FindByAsync(queryParameters)).SelectMany(x => x.Orders).ToList());
         }
 
+        public async Task<EmployeeDto> AddEmployeeAsync(string employeeId, EmployeeForAdditionDto employeeForAdditionDto)
+        {
+            Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
+            employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
+
+            if (await this._repository.AddAsync(employee))
+            {
+                return this._mapper.Map<EmployeeDto>(employee);
+            }
+
+            return null;
+        }
+
         public async Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
         {
             Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
@@ -117,7 +130,7 @@ namespace ApplicationCore.Services
 
         public Task<Boolean> ExistsAsync(string employeeId)
         {
-            return this._repository.ExistsAsync(employeeId);
+            return this._repository.ExistsAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
         }
 
         public async Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
@@ -128,46 +141,73 @@ namespace ApplicationCore.Services
             return await this._repository.UpdateAsync(employee);
         }
 
-        public async Task<EmployeeDto> UpsertingEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            Employees employee = this._mapper.Map<Employees>(employeeForUpdateDto);
-            employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
-
-            EmployeeForAdditionDto employeeForAdditionDto = this._mapper.Map<EmployeeForAdditionDto>(employee);
-
-            return await this.AddEmployeeAsync(employeeForAdditionDto);
-        }
-
         public async Task<ModelStateDictionary> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
         {
             Employees employee = await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
 
-            if (employee != null)
+            EmployeeForUpdateDto employeeForUpdateDto = this._mapper.Map<EmployeeForUpdateDto>(employee);
+
+            this._repository.DetachedEntity(employee);
+
+            ModelStateDictionary modelStateDictionary = new ModelStateDictionary();
+            jsonPatchDocument.ApplyTo(employeeForUpdateDto, modelStateDictionary);
+
+            if (modelStateDictionary.IsValid)
             {
-                EmployeeForUpdateDto employeeForUpdateDto = this._mapper.Map<EmployeeForUpdateDto>(employee);
-
-                this._repository.DetachedEntity(employee);
-
-                ModelStateDictionary modelStateDictionary = new ModelStateDictionary();
-                jsonPatchDocument.ApplyTo(employeeForUpdateDto, modelStateDictionary);
-
-                ValidationContext validationContext= new ValidationContext(employeeForUpdateDto);
+                ValidationContext validationContext = new ValidationContext(employeeForUpdateDto);
                 List<ValidationResult> validationResults = new List<ValidationResult>();
 
                 if (Validator.TryValidateObject(employeeForUpdateDto, validationContext, validationResults))
                 {
-                    await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto);
+                    if (!await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
+                    {
+                        return null;
+                    }
                 }
 
                 foreach (ValidationResult validationResult in validationResults)
                 {
                     modelStateDictionary.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
                 }
-
-                return modelStateDictionary;
             }
 
-            return null;
+            return modelStateDictionary;
+        }
+
+        public async Task<EmployeeDto> UpsertingEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
+        {
+            EmployeeForAdditionDto employeeForAdditionDto = this._mapper.Map<EmployeeForAdditionDto>(this._mapper.Map<Employees>(employeeForUpdateDto));
+
+            return await this.AddEmployeeAsync(employeeId, employeeForAdditionDto);
+        }
+
+        public async Task<EmployeeForUpsertingDto> UpsertingEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        {
+            EmployeeForUpsertingDto employeeForUpsertingDto = new EmployeeForUpsertingDto();
+            employeeForUpsertingDto.ModelStateDictionary = new ModelStateDictionary();
+
+            EmployeeForUpdateDto employeeForUpdateDto = new EmployeeForUpdateDto();
+            jsonPatchDocument.ApplyTo(employeeForUpdateDto, employeeForUpsertingDto.ModelStateDictionary);
+
+            if (employeeForUpsertingDto.ModelStateDictionary.IsValid)
+            {
+                ValidationContext validationContext = new ValidationContext(employeeForUpdateDto);
+                List<ValidationResult> validationResults = new List<ValidationResult>();
+
+                if (Validator.TryValidateObject(employeeForUpdateDto, validationContext, validationResults))
+                {
+                    EmployeeForAdditionDto employeeForAdditionDto = this._mapper.Map<EmployeeForAdditionDto>(this._mapper.Map<Employees>(employeeForUpdateDto));
+
+                    employeeForUpsertingDto.EmployeeDto = await this.AddEmployeeAsync(employeeId, employeeForAdditionDto);
+                }
+
+                foreach (ValidationResult validationResult in validationResults)
+                {
+                    employeeForUpsertingDto.ModelStateDictionary.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
+                }
+            }
+
+            return employeeForUpsertingDto;
         }
     }
 }

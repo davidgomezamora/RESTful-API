@@ -77,7 +77,7 @@ namespace WebAPI
                 {
                     ValidationProblemDetails validationProblemDetails = new ValidationProblemDetails(context.ModelState)
                     {
-                        // Type = "",
+                        Type = "",
                         Title = "One or more model validation errors ocurred.",
                         Status = StatusCodes.Status422UnprocessableEntity,
                         Detail = "See the errors property for details.",

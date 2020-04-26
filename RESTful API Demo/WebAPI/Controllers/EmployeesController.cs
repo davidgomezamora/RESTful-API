@@ -10,7 +10,10 @@ using Common.ResourceParameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace RESTful_API_Demo.Controllers
 {
@@ -119,6 +122,9 @@ namespace RESTful_API_Demo.Controllers
                 {
                     return NoContent();
                 }
+
+                // 304 (Not Modified)
+                return StatusCode(304);
             }
 
             // Upserting
@@ -136,21 +142,42 @@ namespace RESTful_API_Demo.Controllers
         [HttpPatch("{employeeId}")]
         public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
         {
-            ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
-
-            if (modelStateDictionary != null)
+            if (await this._employeeService.ExistsAsync(employeeId))
             {
-                ModelState.Merge(modelStateDictionary);
+                ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
 
-                if (!ModelState.IsValid)
+                if (modelStateDictionary != null)
                 {
-                    return ValidationProblem(ModelState);
+                    ModelState.Merge(modelStateDictionary);
+
+                    if (!ModelState.IsValid)
+                    {
+                        return ValidationProblem(ModelState);
+                    }
+
+                    return NoContent(); 
                 }
 
-                return NoContent(); 
+                // 304 (Not Modified)
+                return StatusCode(304);
             }
 
-            return NotFound();
+            // Upserting
+            EmployeeForUpsertingDto employeeForUpsertingDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, jsonPatchDocument);
+
+            ModelState.Merge(employeeForUpsertingDto.ModelStateDictionary);
+
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            if (employeeForUpsertingDto.EmployeeDto == null)
+            {
+                return NotFound();
+            }
+
+            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeForUpsertingDto.EmployeeDto.EmployeeId }, employeeForUpsertingDto.EmployeeDto);
         }
 
         // [PUT]: .../api/employees/{employeeId}/
@@ -164,5 +191,16 @@ namespace RESTful_API_Demo.Controllers
         }*/
 
         // [PATCH]: .../api/employees/{employeeId}/
+
+        /*
+         * Se hace override del método ValidationProblem, para que la respuesta no sea un 400 Bad Request sino un 422 Unprocessable Entity y
+         * se tenga en cuenta lo configurado en el Startup de la apliacición.
+         */
+        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices
+                .GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
+        }
     }
 }

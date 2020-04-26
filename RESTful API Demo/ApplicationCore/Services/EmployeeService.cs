@@ -47,6 +47,31 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(databaseService));*/
         }
 
+        public override Task<bool> ExistsAsync(object id)
+        {
+            return base.ExistsAsync(this._dataSecurity.AESDescrypt(id.ToString()));
+        }
+
+        public override Task<bool> UpdateAsync(object id, object update)
+        {
+            return base.UpdateAsync(this._dataSecurity.AESDescrypt(id.ToString()), update);
+        }
+
+        public override Task<ModelStateDictionary> PartiallyUpdateAsync<EntityForUpdateDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument)
+        {
+            return base.PartiallyUpdateAsync(this._dataSecurity.AESDescrypt(id.ToString()), jsonPatchDocument);
+        }
+
+        public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForAdditionDto>(object id, object update)
+        {
+            return base.UpsertingAsync<EntityDto, EntityForAdditionDto>(this._dataSecurity.AESDescrypt(id.ToString()), update);
+        }
+
+        public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument, ModelStateDictionary modelStateDictionary)
+        {
+            return base.UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(this._dataSecurity.AESDescrypt(id.ToString()), jsonPatchDocument, modelStateDictionary);
+        }
+
         public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
         {
             // QueryParameters para fitlrado y/o busqueda de resultados
@@ -79,12 +104,6 @@ namespace ApplicationCore.Services
             return this._mapper.Map<List<EmployeeDto>>(await this._repository.FindByAsync(queryParameters));
         }
 
-        public async Task<EmployeeDto> GetEmployeeAsync(string employeeId)
-        {
-            // return await this._databaseService.GetAsync<EmployeeDto>(employeeId);
-            return this._mapper.Map<EmployeeDto>(await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId))));
-        }
-
         public async Task<List<OrderDto>> GetOrdersAsync(string employeeId)
         {
             QueryParameters<Employees> queryParameters = new QueryParameters<Employees>()
@@ -94,126 +113,6 @@ namespace ApplicationCore.Services
             };
 
             return this._mapper.Map<List<OrderDto>>((await this._repository.FindByAsync(queryParameters)).SelectMany(x => x.Orders).ToList());
-        }
-
-        private async Task<EmployeeDto> AddEmployeeAsync(string employeeId, EmployeeForAdditionDto employeeForAdditionDto)
-        {
-            Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
-            employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
-
-            if (await this._repository.AddAsync(employee))
-            {
-                return this._mapper.Map<EmployeeDto>(employee);
-            }
-
-            return null;
-        }
-
-        public async Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
-        {
-            Employees employee = this._mapper.Map<Employees>(employeeForAdditionDto);
-
-            if (await this._repository.AddAsync(employee))
-            {
-                return this._mapper.Map<EmployeeDto>(employee);
-            }
-
-            return null;
-        }
-
-        public async Task<List<EmployeeDto>> AddEmployeesAsync(List<EmployeeForAdditionDto> employeesForAdditionDto)
-        {
-            // List<EmployeeDto> employeesDtos = await this._repository.AddAllAsync(this._mapper.Map<List<Employees>>(employeesDtos));
-            List<EmployeeDto> employeesDtos = new List<EmployeeDto>();
-
-            foreach (EmployeeForAdditionDto employeeForAdditionDto in employeesForAdditionDto)
-            {
-                employeesDtos.Add(await AddEmployeeAsync(employeeForAdditionDto));
-            }
-
-            return employeesDtos;
-        }
-
-        public async Task<Boolean> ExistsAsync(string employeeId)
-        {
-            return await this._repository.ExistsAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
-        }
-
-        public async Task<Boolean> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            Employees employee = this._mapper.Map<Employees>(employeeForUpdateDto);
-            employee.EmployeeId = int.Parse(this._dataSecurity.AESDescrypt(employeeId));
-
-            return await this._repository.UpdateAsync(employee);
-        }
-
-        public async Task<ModelStateDictionary> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
-        {
-            Employees employee = await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)));
-
-            EmployeeForUpdateDto employeeForUpdateDto = this._mapper.Map<EmployeeForUpdateDto>(employee);
-
-            this._repository.DetachedEntity(employee);
-
-            ModelStateDictionary modelStateDictionary = new ModelStateDictionary();
-            jsonPatchDocument.ApplyTo(employeeForUpdateDto, modelStateDictionary);
-
-            if (modelStateDictionary.IsValid)
-            {
-                ValidationContext validationContext = new ValidationContext(employeeForUpdateDto);
-                List<ValidationResult> validationResults = new List<ValidationResult>();
-
-                if (Validator.TryValidateObject(employeeForUpdateDto, validationContext, validationResults))
-                {
-                    if (!await this.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
-                    {
-                        return null;
-                    }
-                }
-
-                foreach (ValidationResult validationResult in validationResults)
-                {
-                    modelStateDictionary.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
-                }
-            }
-
-            return modelStateDictionary;
-        }
-
-        public async Task<EmployeeDto> UpsertingEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            EmployeeForAdditionDto employeeForAdditionDto = this._mapper.Map<EmployeeForAdditionDto>(this._mapper.Map<Employees>(employeeForUpdateDto));
-
-            return await this.AddEmployeeAsync(employeeId, employeeForAdditionDto);
-        }
-
-        public async Task<EmployeeForUpsertingDto> UpsertingEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
-        {
-            EmployeeForUpsertingDto employeeForUpsertingDto = new EmployeeForUpsertingDto();
-            employeeForUpsertingDto.ModelStateDictionary = new ModelStateDictionary();
-
-            EmployeeForUpdateDto employeeForUpdateDto = new EmployeeForUpdateDto();
-            jsonPatchDocument.ApplyTo(employeeForUpdateDto, employeeForUpsertingDto.ModelStateDictionary);
-
-            if (employeeForUpsertingDto.ModelStateDictionary.IsValid)
-            {
-                ValidationContext validationContext = new ValidationContext(employeeForUpdateDto);
-                List<ValidationResult> validationResults = new List<ValidationResult>();
-
-                if (Validator.TryValidateObject(employeeForUpdateDto, validationContext, validationResults))
-                {
-                    EmployeeForAdditionDto employeeForAdditionDto = this._mapper.Map<EmployeeForAdditionDto>(this._mapper.Map<Employees>(employeeForUpdateDto));
-
-                    employeeForUpsertingDto.EmployeeDto = await this.AddEmployeeAsync(employeeId, employeeForAdditionDto);
-                }
-
-                foreach (ValidationResult validationResult in validationResults)
-                {
-                    employeeForUpsertingDto.ModelStateDictionary.AddModelError(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage);
-                }
-            }
-
-            return employeeForUpsertingDto;
         }
     }
 }

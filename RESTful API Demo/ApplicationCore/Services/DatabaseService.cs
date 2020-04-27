@@ -129,7 +129,7 @@ namespace ApplicationCore.Services
             return this._mapper.Map<List<EntityDto>>(await this._repository.FindByAsync(queryParameters));
         }
 
-        public async Task<EntityDto> GetAsync<EntityDto>(object id) where EntityDto : class
+        public virtual async Task<EntityDto> GetAsync<EntityDto>(object id) where EntityDto : class
         {
             TEntity entity = await this._repository.GetByIdAsync(id);
 
@@ -159,7 +159,7 @@ namespace ApplicationCore.Services
 
                 if (Validator.TryValidateObject(entityForUpdateDto, validationContext, validationResults))
                 {
-                    if (!await this.UpdateAsync(id, entityForUpdateDto))
+                    if (!await this._UpdateAsync(id, entityForUpdateDto))
                     {
                         return null;
                     }
@@ -172,6 +172,14 @@ namespace ApplicationCore.Services
             }
 
             return modelStateDictionary;
+        }
+
+        private async Task<Boolean> _UpdateAsync(object id, object update)
+        {
+            TEntity entity = this._mapper.Map<TEntity>(update);
+            this.TrySetProperty(entity, this._repository.PrimaryKeyName, id);
+
+            return await this._repository.UpdateAsync(entity);
         }
 
         public virtual async Task<Boolean> UpdateAsync(object id, object update)

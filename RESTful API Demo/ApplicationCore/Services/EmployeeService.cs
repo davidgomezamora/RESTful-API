@@ -49,27 +49,32 @@ namespace ApplicationCore.Services
 
         public override Task<bool> ExistsAsync(object id)
         {
-            return base.ExistsAsync(this._dataSecurity.AESDescrypt(id.ToString()));
+            return base.ExistsAsync(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())));
         }
 
-        public override Task<bool> UpdateAsync(object id, object update)
+        public override Task<EntityDto> GetAsync<EntityDto>(object id)
         {
-            return base.UpdateAsync(this._dataSecurity.AESDescrypt(id.ToString()), update);
+            return base.GetAsync<EntityDto>(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())));
         }
 
         public override Task<ModelStateDictionary> PartiallyUpdateAsync<EntityForUpdateDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument)
         {
-            return base.PartiallyUpdateAsync(this._dataSecurity.AESDescrypt(id.ToString()), jsonPatchDocument);
+            return base.PartiallyUpdateAsync(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), jsonPatchDocument);
+        }
+
+        public override Task<bool> UpdateAsync(object id, object update)
+        {
+            return base.UpdateAsync(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), update);
         }
 
         public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForAdditionDto>(object id, object update)
         {
-            return base.UpsertingAsync<EntityDto, EntityForAdditionDto>(this._dataSecurity.AESDescrypt(id.ToString()), update);
+            return base.UpsertingAsync<EntityDto, EntityForAdditionDto>(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), update);
         }
 
         public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument, ModelStateDictionary modelStateDictionary)
         {
-            return base.UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(this._dataSecurity.AESDescrypt(id.ToString()), jsonPatchDocument, modelStateDictionary);
+            return base.UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), jsonPatchDocument, modelStateDictionary);
         }
 
         public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)

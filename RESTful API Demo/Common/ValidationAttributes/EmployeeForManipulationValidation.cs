@@ -1,5 +1,6 @@
 ﻿using Common.DTO.Employee;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -11,7 +12,9 @@ namespace Common.ValidationAttributes
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            EmployeeForManipulationDto employeeForManipulationDto = (EmployeeForManipulationDto)validationContext.ObjectInstance;
+            //List<EmployeeForManipulationDto> employeeForManipulationDtos = (List<validationContext.ObjectInstance.GetType()>)validationContext.ObjectInstance.
+
+            EmployeeForManipulationDto employeeForManipulationDto = (EmployeeForManipulationDto)value;
 
             if (employeeForManipulationDto.FirstName.Equals(employeeForManipulationDto.LastName))
             {

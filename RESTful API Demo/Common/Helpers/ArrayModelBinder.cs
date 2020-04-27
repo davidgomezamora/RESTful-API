@@ -46,7 +46,7 @@ namespace Common.Helpers
                 .ToArray();
 
             // Cree una matriz de ese tipo y configúrela como el valor del Modelo
-            Array typesValues = Array.CreateInstance(elementType, value.Length);
+            Array typesValues = Array.CreateInstance(elementType, values.Length);
             values.CopyTo(typesValues, 0);
             bindingContext.Model = typesValues;
 

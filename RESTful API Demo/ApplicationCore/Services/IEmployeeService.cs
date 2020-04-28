@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using ServicesBase;
 
 namespace ApplicationCore.Services
 {
-    public interface IEmployeeService : IDatabaseService
+    public interface IEmployeeService : IServiceBase
     {
         Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
         //Task<EmployeeDto> GetEmployeeAsync(string employeeId);

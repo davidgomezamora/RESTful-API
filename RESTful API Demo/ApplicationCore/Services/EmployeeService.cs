@@ -1,25 +1,21 @@
 ﻿using Infraestructure.Entities;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using AutoMapper;
 using System.Linq;
 using Common.ResourceParameters;
 using Common.DTO.Employee;
-using System.Linq.Expressions;
 using Security;
 using Common.DTO.Order;
 using Repository;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.JsonPatch;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
+using Microsoft.AspNetCore.JsonPatch;
+using ServicesBase;
 
 namespace ApplicationCore.Services
 {
-    public class EmployeeService : DatabaseService<Employees>, IEmployeeService
+    public class EmployeeService : ServiceBase<Employees>, IEmployeeService
     {
         //private readonly IRepository<Employees> _repository;
         private readonly IDataSecurity _dataSecurity;
@@ -49,32 +45,49 @@ namespace ApplicationCore.Services
 
         public override Task<bool> ExistsAsync(object id)
         {
-            return base.ExistsAsync(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())));
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }  else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.ExistsAsync(id);
         }
 
         public override Task<EntityDto> GetAsync<EntityDto>(object id)
         {
-            return base.GetAsync<EntityDto>(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())));
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }
+            else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.GetAsync<EntityDto>(id);
         }
 
-        public override Task<ModelStateDictionary> PartiallyUpdateAsync<EntityForUpdateDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument)
+        public override Task<List<EntityDto>> GetAsync<EntityDto>(List<object> ids)
         {
-            return base.PartiallyUpdateAsync(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), jsonPatchDocument);
-        }
+            for (int i = 0; i < ids.Count(); i++)
+            {
+                int j = 0;
+                if (int.TryParse(ids[i].ToString(), out j))
+                {
+                    ids[i] = j;
+                }
+                else
+                {
+                    ids[i] = int.Parse(this._dataSecurity.AESDescrypt(ids[i].ToString()));
+                }
+            }
 
-        public override Task<bool> UpdateAsync(object id, object update)
-        {
-            return base.UpdateAsync(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), update);
-        }
-
-        public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForAdditionDto>(object id, object update)
-        {
-            return base.UpsertingAsync<EntityDto, EntityForAdditionDto>(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), update);
-        }
-
-        public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument, ModelStateDictionary modelStateDictionary)
-        {
-            return base.UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(int.Parse(this._dataSecurity.AESDescrypt(id.ToString())), jsonPatchDocument, modelStateDictionary);
+            return base.GetAsync<EntityDto>(ids);
         }
 
         public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
@@ -111,13 +124,105 @@ namespace ApplicationCore.Services
 
         public async Task<List<OrderDto>> GetOrdersAsync(string employeeId)
         {
-            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>()
+            List<string> pathRelatedEntities = new List<string>()
             {
-                Where = x => x.EmployeeId.ToString() == this._dataSecurity.AESDescrypt(employeeId),
-                PathRelatedEntities = new List<string>() { "Orders" }
+                { "Orders" }
             };
 
-            return this._mapper.Map<List<OrderDto>>((await this._repository.FindByAsync(queryParameters)).SelectMany(x => x.Orders).ToList());
+            return this._mapper.Map<List<OrderDto>>((await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)), pathRelatedEntities)).Orders.ToList());
+        }
+        
+        public override Task<ModelStateDictionary> PartiallyUpdateAsync<EntityForUpdateDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument)
+        {
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }
+            else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.PartiallyUpdateAsync(id, jsonPatchDocument);
+        }
+
+        public override Task<bool> RemoveAsync(object id)
+        {
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }
+            else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.RemoveAsync(id);
+        }
+
+        public override Task<int> RemoveAsync(List<object> ids)
+        {
+            for (int i = 0; i < ids.Count(); i++)
+            {
+                int j = 0;
+                if (int.TryParse(ids[i].ToString(), out j))
+                {
+                    ids[i] = j;
+                }
+                else
+                {
+                    ids[i] = int.Parse(this._dataSecurity.AESDescrypt(ids[i].ToString()));
+                }
+            }
+
+            return base.RemoveAsync(ids);
+        }
+
+        public override Task<bool> UpdateAsync(object id, object update)
+        {
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }
+            else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.UpdateAsync(id, update);
+        }
+
+        public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForAdditionDto>(object id, object update)
+        {
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }
+            else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.UpsertingAsync<EntityDto, EntityForAdditionDto>(id, update);
+        }
+
+        public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument, ModelStateDictionary modelStateDictionary)
+        {
+            int i = 0;
+            if (int.TryParse(id.ToString(), out i))
+            {
+                id = i;
+            }
+            else
+            {
+                id = int.Parse(this._dataSecurity.AESDescrypt(id.ToString()));
+            }
+
+            return base.UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(id, jsonPatchDocument, modelStateDictionary);
         }
     }
 }

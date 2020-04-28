@@ -58,7 +58,6 @@ namespace RESTful_API_Demo.Controllers
         [HttpGet("{employeeId}", Name = "GetEmployeeAsync")]
         public async Task<ActionResult<EmployeeDto>> GetEmployeeAsync(string employeeId)
         {
-            // EmployeeDto employeeDTO = await this._employeeService.GetEmployeeAsync(employeeId);
             EmployeeDto employeeDTO = await this._employeeService.GetAsync<EmployeeDto>(employeeId);
 
             if (employeeDTO == null)
@@ -87,7 +86,6 @@ namespace RESTful_API_Demo.Controllers
         [HttpPost]
         public async Task<ActionResult<EmployeeDto>> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
         {
-            //EmployeeDto employeeDto = await this._employeeService.AddEmployeeAsync(employeeForAdditionDto);
             EmployeeDto employeeDto = await this._employeeService.AddAsync<EmployeeDto>(employeeForAdditionDto);
 
             if (employeeDto == null)
@@ -104,7 +102,6 @@ namespace RESTful_API_Demo.Controllers
         {
             if (await this._employeeService.ExistsAsync(employeeId))
             {
-                //if (await this._employeeService.UpdateEmployeeAsync(employeeId, employeeForUpdateDto))
                 if (await this._employeeService.UpdateAsync(employeeId, employeeForUpdateDto))
                 {
                     return NoContent();
@@ -115,7 +112,6 @@ namespace RESTful_API_Demo.Controllers
             }
 
             // Upserting
-            //EmployeeDto employeeDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, employeeForUpdateDto);
             EmployeeDto employeeDto = await this._employeeService.UpsertingAsync<EmployeeDto, EmployeeForAdditionDto>(employeeId, employeeForUpdateDto);
 
             if (employeeDto == null)
@@ -132,7 +128,6 @@ namespace RESTful_API_Demo.Controllers
         {
             if (await this._employeeService.ExistsAsync(employeeId))
             {
-                //ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateEmployeeAsync(employeeId, jsonPatchDocument);
                 ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateAsync<EmployeeForUpdateDto>(employeeId, jsonPatchDocument);
 
                 if (modelStateDictionary != null)
@@ -144,7 +139,7 @@ namespace RESTful_API_Demo.Controllers
                         return ValidationProblem(ModelState);
                     }
 
-                    return NoContent(); 
+                    return NoContent();
                 }
 
                 // 304 (Not Modified)
@@ -152,22 +147,6 @@ namespace RESTful_API_Demo.Controllers
             }
 
             // Upserting
-            /*EmployeeForUpsertingDto employeeForUpsertingDto = await this._employeeService.UpsertingEmployeeAsync(employeeId, jsonPatchDocument);
-
-            ModelState.Merge(employeeForUpsertingDto.ModelStateDictionary);
-
-            if (!ModelState.IsValid)
-            {
-                return ValidationProblem(ModelState);
-            }
-
-            if (employeeForUpsertingDto.EmployeeDto == null)
-            {
-                return NotFound();
-            }
-
-            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeForUpsertingDto.EmployeeDto.EmployeeId }, employeeForUpsertingDto.EmployeeDto);*/
-
             EmployeeDto employeeDto = await this._employeeService.UpsertingAsync<EmployeeDto, EmployeeForUpdateDto, EmployeeForAdditionDto>(employeeId, jsonPatchDocument, ModelState);
 
             if (!ModelState.IsValid)
@@ -181,6 +160,24 @@ namespace RESTful_API_Demo.Controllers
             }
 
             return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
+        }
+
+        // [DELETE]: .../api/employees/{employeeId}/
+        [HttpDelete("{employeeId}")]
+        public async Task<ActionResult> RemoveEmployeeAsync(string employeeId)
+        {
+            if (await this._employeeService.ExistsAsync(employeeId))
+            {
+                if (await this._employeeService.RemoveAsync(employeeId))
+                {
+                    return NoContent();
+                }
+
+                // 304 (Not Modified)
+                return StatusCode(304);
+            }
+
+            return NotFound();
         }
 
         // [GET]: .../api/employees/error/

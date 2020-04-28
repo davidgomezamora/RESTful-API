@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="3.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />
-    <PackageReference Include="Repository" Version="1.0.12" />
+    <PackageReference Include="Repository" Version="1.0.14" />
     <PackageReference Include="Security" Version="1.0.3" />
+    <PackageReference Include="ServicesBase" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

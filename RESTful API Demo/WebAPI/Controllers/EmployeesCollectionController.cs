@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Services;
 using Common.DTO.Employee;
-using Common.Helpers;
+using Common.ResourceParameters;
+using CommonWebAPI;
 using Infraestructure.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,13 +42,7 @@ namespace RESTful_API_Demo.Controllers
                 return BadRequest();
             }
 
-            List<EmployeeDto> employeeDtos = new List<EmployeeDto>();
-
-            foreach (string id in ids)
-            {
-                //employeeDtos.Add(await this._employeeService.GetEmployeeAsync(id));
-                employeeDtos.Add(await this._employeeService.GetAsync<EmployeeDto>(id));
-            }
+            List<EmployeeDto> employeeDtos = await this._employeeService.GetAsync<EmployeeDto>(ids.ToList<object>());
 
             if (!ids.Count().Equals(employeeDtos.Count()))
             {
@@ -70,6 +66,25 @@ namespace RESTful_API_Demo.Controllers
             var idsEmployees = String.Join(",", employeesDto.Select(x => x.EmployeeId));
 
             return CreatedAtRoute("GetEmployeesCollectionAsync", new { ids = idsEmployees }, employeesDto);
+        }
+
+        // [DELETE] .../api/employeesCollection/(id,id,id...)
+        [HttpDelete("({ids})")]
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> RemoveEmployeesCollectionAsync(
+            [FromRoute]
+            [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
+        {
+            if (ids == null)
+            {
+                return BadRequest();
+            }
+
+            if (ids.Count() == await this._employeeService.RemoveAsync(ids.ToList<object>()))
+            {
+                return NoContent();
+            }
+
+            return NotFound();
         }
     }
 }

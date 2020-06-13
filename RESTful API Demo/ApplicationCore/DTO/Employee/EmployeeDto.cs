@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
-namespace Common.DTO.Employee
+namespace ApplicationCore.DTO.Employee
 {
     // [DataContract]
     public class EmployeeDto

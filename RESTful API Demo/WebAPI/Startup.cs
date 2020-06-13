@@ -18,9 +18,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using AutoMapper;
-using Security;
-using Repository;
 using Newtonsoft.Json.Serialization;
+using CommonWebAPI.Repository;
+using CommonWebAPI.Security;
 
 namespace WebAPI
 {

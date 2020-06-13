@@ -1,4 +1,4 @@
-﻿using Common.DTO.Employee;
+﻿using ApplicationCore.DTO.Employee;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Common.ValidationAttributes
+namespace ApplicationCore.ValidationAttributes
 {
     public class EmployeeForManipulationValidation : ValidationAttribute
     {

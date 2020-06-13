@@ -3,24 +3,22 @@ using System;
 using System.Collections.Generic;
 using AutoMapper;
 using System.Linq;
-using Common.ResourceParameters;
-using Common.DTO.Employee;
-using Security;
-using Common.DTO.Order;
-using Repository;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.JsonPatch;
-using ServicesBase;
+using ApplicationCore.DTO.Employee;
+using ApplicationCore.DTO.Order;
+using ApplicationCore.ResourceParameters;
+using CommonWebAPI.DataService;
+using CommonWebAPI.Security;
+using CommonWebAPI.Repository;
+using CommonWebAPI.Helpers;
 
 namespace ApplicationCore.Services
 {
     public class EmployeeService : ServiceBase<Employees>, IEmployeeService
     {
-        //private readonly IRepository<Employees> _repository;
         private readonly IDataSecurity _dataSecurity;
-        //private readonly IMapper _mapper;*/
-        // private readonly IDatabaseService<Employees> _databaseService;
 
         // Interfaz de servicios de entidades secundarias
 
@@ -45,7 +43,7 @@ namespace ApplicationCore.Services
 
         public override Task<bool> ExistsAsync(object id)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;
@@ -59,7 +57,7 @@ namespace ApplicationCore.Services
 
         public override Task<EntityDto> GetAsync<EntityDto>(object id)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;
@@ -76,7 +74,7 @@ namespace ApplicationCore.Services
         {
             for (int i = 0; i < ids.Count(); i++)
             {
-                int j = 0;
+                int j;
                 if (int.TryParse(ids[i].ToString(), out j))
                 {
                     ids[i] = j;
@@ -90,13 +88,14 @@ namespace ApplicationCore.Services
             return base.GetAsync<EntityDto>(ids);
         }
 
-        public async Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
+        public async Task<PagedList<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters)
         {
             // QueryParameters para fitlrado y/o busqueda de resultados
-            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>();
-
-            queryParameters.PageSize = employeeResourceParameters.PageSize;
-            queryParameters.PageNumber = employeeResourceParameters.PageNumber;
+            QueryParameters<Employees> queryParameters = new QueryParameters<Employees>
+            {
+                PageSize = employeeResourceParameters.PageSize,
+                PageNumber = employeeResourceParameters.PageNumber
+            };
 
             // Resuelve el filtro: HireDate
             if (!string.IsNullOrWhiteSpace(employeeResourceParameters.HireDate.ToString()))
@@ -118,8 +117,16 @@ namespace ApplicationCore.Services
                 queryParameters.WhereList.Add(x => (x.FirstName + "" + x.LastName).Contains(employeeResourceParameters.SearchQuery));
             }
 
-            // Retorna el resultado con filtro y/o busqueda
-            return this._mapper.Map<List<EmployeeDto>>(await this._repository.FindByAsync(queryParameters));
+            // Conteo de resultados totales
+            int count = await this._repository.CountAsync(queryParameters.WhereList);
+
+            // Resultado con filtro y/o busqueda paginada
+            List<EmployeeDto> employeeDtos = this._mapper.Map<List<EmployeeDto>>(await this._repository.GetAsync(queryParameters));
+
+            // Retorna el resultado con filtro y/o busqueda y meta datos paginados
+            return new PagedList<EmployeeDto>(employeeDtos, count, employeeResourceParameters.PageNumber, employeeResourceParameters.PageSize);
+
+            // return this._mapper.Map<List<EmployeeDto>>(await this._repository.GetAsync(queryParameters));
         }
 
         public async Task<List<OrderDto>> GetOrdersAsync(string employeeId)
@@ -129,12 +136,12 @@ namespace ApplicationCore.Services
                 { "Orders" }
             };
 
-            return this._mapper.Map<List<OrderDto>>((await this._repository.GetByIdAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)), pathRelatedEntities)).Orders.ToList());
+            return this._mapper.Map<List<OrderDto>>((await this._repository.GetAsync(int.Parse(this._dataSecurity.AESDescrypt(employeeId)), pathRelatedEntities)).Orders.ToList());
         }
         
         public override Task<ModelStateDictionary> PartiallyUpdateAsync<EntityForUpdateDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;
@@ -149,7 +156,7 @@ namespace ApplicationCore.Services
 
         public override Task<bool> RemoveAsync(object id)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;
@@ -162,11 +169,11 @@ namespace ApplicationCore.Services
             return base.RemoveAsync(id);
         }
 
-        public override Task<int> RemoveAsync(List<object> ids)
+        public override Task<List<object>> RemoveAsync(List<object> ids)
         {
             for (int i = 0; i < ids.Count(); i++)
             {
-                int j = 0;
+                int j;
                 if (int.TryParse(ids[i].ToString(), out j))
                 {
                     ids[i] = j;
@@ -182,7 +189,7 @@ namespace ApplicationCore.Services
 
         public override Task<bool> UpdateAsync(object id, object update)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;
@@ -197,7 +204,7 @@ namespace ApplicationCore.Services
 
         public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForAdditionDto>(object id, object update)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;
@@ -212,7 +219,7 @@ namespace ApplicationCore.Services
 
         public override Task<EntityDto> UpsertingAsync<EntityDto, EntityForUpdateDto, EntityForAdditionDto>(object id, JsonPatchDocument<EntityForUpdateDto> jsonPatchDocument, ModelStateDictionary modelStateDictionary)
         {
-            int i = 0;
+            int i;
             if (int.TryParse(id.ToString(), out i))
             {
                 id = i;

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Common.DTO.Employee
+namespace ApplicationCore.DTO.Employee
 {
     public class EmployeeForUpsertingDto
     {

@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using Common.DTO.Order;
+﻿using ApplicationCore.DTO.Order;
+using AutoMapper;
+using CommonWebAPI.Security;
 using Infraestructure.Entities;
-using Security;
 using System;
 using System.Collections.Generic;
 using System.Text;

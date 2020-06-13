@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApplicationCore.DTO.Employee;
 using ApplicationCore.Services;
-using Common.DTO.Employee;
-using Common.ResourceParameters;
 using CommonWebAPI;
+using CommonWebAPI.Helpers;
 using Infraestructure.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ namespace RESTful_API_Demo.Controllers
     // Definición del endpoint de este controlador ../api/employeesCollection/
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesCollectionController : ControllerBase
+    public class EmployeesCollectionController : APIController
     {
         private readonly IEmployeeService _employeeService;
 
@@ -79,7 +79,7 @@ namespace RESTful_API_Demo.Controllers
                 return BadRequest();
             }
 
-            if (ids.Count() == await this._employeeService.RemoveAsync(ids.ToList<object>()))
+            if (ids.Count() == (await this._employeeService.RemoveAsync(ids.ToList<object>())).Count())
             {
                 return NoContent();
             }

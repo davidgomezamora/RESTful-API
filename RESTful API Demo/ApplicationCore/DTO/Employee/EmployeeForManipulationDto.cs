@@ -1,11 +1,11 @@
-﻿using Common.DTO.Order;
-using Common.ValidationAttributes;
+﻿using ApplicationCore.DTO.Order;
+using ApplicationCore.ValidationAttributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Common.DTO.Employee
+namespace ApplicationCore.DTO.Employee
 {
     [EmployeeForManipulationValidation]
     public abstract class EmployeeForManipulationDto

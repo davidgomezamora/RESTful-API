@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ApplicationCore.DTO.Employee;
 using AutoMapper;
-using Common.DTO.Employee;
+using CommonWebAPI.Security;
 using Infraestructure.Entities;
-using Security;
 
 namespace ApplicationCore.MapperProfile
 {
@@ -21,8 +21,8 @@ namespace ApplicationCore.MapperProfile
             CreateMap<Employees, EmployeeForUpdateDto>();
             CreateMap<Employees, EmployeeForAdditionDto>();
 
-            CreateMap<EmployeeForAdditionDto, Employees>();
             CreateMap<EmployeeForUpdateDto, Employees>();
+            CreateMap<EmployeeForAdditionDto, Employees>();
         }
     }
 }

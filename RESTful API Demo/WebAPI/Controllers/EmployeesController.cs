@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using ApplicationCore.DTO.Employee;
+using ApplicationCore.DTO.Order;
+using ApplicationCore.ResourceParameters;
 using ApplicationCore.Services;
-using Common.DTO.Employee;
-using Common.DTO.Order;
-using Common.ResourceParameters;
+using CommonWebAPI.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +26,7 @@ namespace RESTful_API_Demo.Controllers
     // Definición del endpoint de este controlador ../api/employees/
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController : ControllerBase
+    public class EmployeesController : APIController
     {
         private readonly IEmployeeService _employeeService;
 
@@ -41,14 +43,24 @@ namespace RESTful_API_Demo.Controllers
         // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}
         // [GET]: .../api/employees?pageSize={value}&pageNumber={value}
         // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}&pageSize={value}&pageNumber={value}
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
+        [HttpGet(Name = "GetEmployees")]
+        public async Task<ActionResult<PagedList<EmployeeDto>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
         {
-            List<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
+            PagedList<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
 
-            if (employeeDtos.Count() == 0)
+            if (employeeDtos.Results.Count() == 0)
             {
                 return NoContent();
+            }
+
+            if(employeeDtos.HasPrevious)
+            {
+                employeeDtos.PreviousPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.PreviousPage, "GetEmployees");
+            }
+
+            if (employeeDtos.HasNext)
+            {
+                employeeDtos.NextPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.NextPage, "GetEmployees");
             }
 
             return Ok(employeeDtos);
@@ -194,17 +206,6 @@ namespace RESTful_API_Demo.Controllers
             Response.Headers.Add("Allow", "GET, POST, DELETE, PUT, PATCH");
 
             return Ok();
-        }
-
-        /*
-         * Se hace override del método ValidationProblem, para que la respuesta no sea un 400 Bad Request sino un 422 Unprocessable Entity y
-         * se tenga en cuenta lo configurado en el Startup de la apliacición.
-         */
-        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
-        {
-            var options = HttpContext.RequestServices
-                .GetRequiredService<IOptions<ApiBehaviorOptions>>();
-            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }

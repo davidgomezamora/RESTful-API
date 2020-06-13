@@ -1,20 +1,21 @@
-﻿using Common.ResourceParameters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Common.DTO.Employee;
-using Common.DTO.Order;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using ServicesBase;
+using ApplicationCore.DTO.Employee;
+using ApplicationCore.ResourceParameters;
+using ApplicationCore.DTO.Order;
+using CommonWebAPI.DataService;
+using CommonWebAPI.Helpers;
 
 namespace ApplicationCore.Services
 {
     public interface IEmployeeService : IServiceBase
     {
-        Task<List<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
+        Task<PagedList<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
         //Task<EmployeeDto> GetEmployeeAsync(string employeeId);
         Task<List<OrderDto>> GetOrdersAsync(string employeeId);
         /*Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto);

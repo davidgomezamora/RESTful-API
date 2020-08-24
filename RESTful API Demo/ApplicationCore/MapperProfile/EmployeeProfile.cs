@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ApplicationCore.DTO.Employee;
 using AutoMapper;
-using CommonWebAPI.Security;
+using Common.Security;
 using Infraestructure.Entities;
 
 namespace ApplicationCore.MapperProfile
@@ -23,6 +23,21 @@ namespace ApplicationCore.MapperProfile
 
             CreateMap<EmployeeForUpdateDto, Employees>();
             CreateMap<EmployeeForAdditionDto, Employees>();
+            CreateMap<EmployeeForSortingDto, Employees>()
+                .ForMember(dest => dest.FirstName,
+                opt => opt.MapFrom(src => src.FullName))
+                .ForMember(dest => dest.LastName,
+                opt => opt.MapFrom(src => src.FullName))
+                .ForAllOtherMembers(opt => opt.Ignore());
+        }
+    }
+
+    public static class MappingExpressionExtensions
+    {
+        public static IMappingExpression<TSource, TDest> IgnoreAllUnmapped<TSource, TDest>(this IMappingExpression<TSource, TDest> expression)
+        {
+            expression.ForAllMembers(opt => opt.Ignore());
+            return expression;
         }
     }
 }

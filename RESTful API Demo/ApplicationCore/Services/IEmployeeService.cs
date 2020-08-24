@@ -8,12 +8,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using ApplicationCore.DTO.Employee;
 using ApplicationCore.ResourceParameters;
 using ApplicationCore.DTO.Order;
-using CommonWebAPI.DataService;
-using CommonWebAPI.Helpers;
+using Common.Helpers;
+using Infraestructure.Entities;
+using Common.BaseService;
 
 namespace ApplicationCore.Services
 {
-    public interface IEmployeeService : IServiceBase
+    public interface IEmployeeService : IBaseService
     {
         Task<PagedList<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
         //Task<EmployeeDto> GetEmployeeAsync(string employeeId);

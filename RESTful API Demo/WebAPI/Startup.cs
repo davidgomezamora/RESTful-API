@@ -19,8 +19,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Newtonsoft.Json.Serialization;
-using CommonWebAPI.Repository;
-using CommonWebAPI.Security;
+using Common.DataRepository;
+using Common.Security;
 
 namespace WebAPI
 {
@@ -144,7 +144,6 @@ namespace WebAPI
              * Requiere la dependencia con la capa ApplicationCore
              */
             services.AddScoped(typeof(IEmployeeService), typeof(EmployeeService));
-            // services.AddScoped(typeof(IDatabaseService<>), typeof(DatabaseService<>));
 
             /*
              * ---------------------------------------------------------

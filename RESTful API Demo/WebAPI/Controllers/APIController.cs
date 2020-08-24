@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CommonWebAPI.Helpers;
-using CommonWebAPI.Parameters;
+using Common.Helpers;
+using Common.Parameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -30,7 +30,7 @@ namespace RESTful_API_Demo.Controllers
         /*
          * Se implementa método que genera el enlace de paginación
          */
-        public string CreateResourceUri<T>(T resourceParameters, ResourceUriType resourceUriType, string methodName) where T : ParametersBase
+        public string CreateResourceUri<T>(T resourceParameters, ResourceUriType resourceUriType, string methodName) where T : ServiceParameters
         {
             switch (resourceUriType)
             {

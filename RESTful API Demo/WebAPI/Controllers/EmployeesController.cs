@@ -8,7 +8,7 @@ using ApplicationCore.DTO.Employee;
 using ApplicationCore.DTO.Order;
 using ApplicationCore.ResourceParameters;
 using ApplicationCore.Services;
-using CommonWebAPI.Helpers;
+using Common.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +46,13 @@ namespace RESTful_API_Demo.Controllers
         [HttpGet(Name = "GetEmployees")]
         public async Task<ActionResult<PagedList<EmployeeDto>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
         {
-            PagedList<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
+            if (!this._employeeService.ValidateOrderBy(employeeResourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            // PagedList<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
+            PagedList<EmployeeDto> employeeDtos = await this._employeeService.GetAsync<EmployeeDto>(employeeResourceParameters);
 
             if (employeeDtos.Results.Count() == 0)
             {

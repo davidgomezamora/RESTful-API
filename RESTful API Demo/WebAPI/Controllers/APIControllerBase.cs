@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 namespace RESTful_API_Demo.Controllers
 {
     [ApiController]
-    public class APIController : ControllerBase
+    public class APIControllerBase : ControllerBase
     {
         /*
          * Se hace override del método ValidationProblem, para que la respuesta no sea un 400 Bad Request sino un 422 Unprocessable Entity y

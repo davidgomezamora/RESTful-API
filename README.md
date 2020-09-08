@@ -13,7 +13,7 @@ If you like test the web API in localhost or the web API deployed in Azure, you 
   1. [Download](https://www.getpostman.com/downloads/) Postman software
   2. Open Postman
   3. Import > Import from link
-  4. Paste the next [URL](https://www.getpostman.com/collections/34ed21297861694a9e81)
+  4. Paste the next [URL](https://www.getpostman.com/collections/24feede7b4b15973e1cf)
   5. Open the Sample web APIs collection
   6. Open RESTful web API folder
   7. Run the URL you need

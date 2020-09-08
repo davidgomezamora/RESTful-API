@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Dynamic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -25,8 +26,7 @@ namespace RESTful_API_Demo.Controllers
     [ApiVersion("0.5", Deprecated = true)]
     // Definición del endpoint de este controlador ../api/employees/
     [Route("api/[controller]")]
-    [ApiController]
-    public class EmployeesController : APIController
+    public class EmployeesController : APIControllerBase
     {
         private readonly IEmployeeService _employeeService;
 
@@ -38,52 +38,51 @@ namespace RESTful_API_Demo.Controllers
         }
 
         // [GET]: .../api/employees/
-        // [GET]: .../api/employees?modifiedDate={value}
-        // [GET]: .../api/employees?searchQuery={value}
-        // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}
-        // [GET]: .../api/employees?pageSize={value}&pageNumber={value}
-        // [GET]: .../api/employees?modifiedDate={value}&searchQuery={value}&pageSize={value}&pageNumber={value}
         [HttpGet(Name = "GetEmployees")]
-        public async Task<ActionResult<PagedList<EmployeeDto>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
+        public async Task<ActionResult<PagedList<ExpandoObject>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
         {
-            if (!this._employeeService.ValidateOrderBy(employeeResourceParameters.OrderBy))
+            if (!this._employeeService.ValidateOrderBy(employeeResourceParameters.OrderBy) || !this._employeeService.ValidateFields<EmployeeDto>(employeeResourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            // PagedList<EmployeeDto> employeeDtos = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
-            PagedList<EmployeeDto> employeeDtos = await this._employeeService.GetAsync<EmployeeDto>(employeeResourceParameters);
+            PagedList<ExpandoObject> pagedList = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
 
-            if (employeeDtos.Results.Count() == 0)
+            if (pagedList.Results.Count() == 0)
             {
                 return NoContent();
             }
 
-            if(employeeDtos.HasPrevious)
+            if(pagedList.HasPrevious)
             {
-                employeeDtos.PreviousPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.PreviousPage, "GetEmployees");
+                pagedList.PreviousPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.PreviousPage, "GetEmployees");
             }
 
-            if (employeeDtos.HasNext)
+            if (pagedList.HasNext)
             {
-                employeeDtos.NextPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.NextPage, "GetEmployees");
+                pagedList.NextPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.NextPage, "GetEmployees");
             }
 
-            return Ok(employeeDtos);
+            return Ok(pagedList);
         }
 
         // [GET]: .../api/employees/{employeeId}/
         [HttpGet("{employeeId}", Name = "GetEmployeeAsync")]
-        public async Task<ActionResult<EmployeeDto>> GetEmployeeAsync(string employeeId)
+        public async Task<ActionResult<ExpandoObject>> GetEmployeeAsync(string employeeId, string fields)
         {
-            EmployeeDto employeeDTO = await this._employeeService.GetAsync<EmployeeDto>(employeeId);
+            if (!this._employeeService.ValidateFields<EmployeeDto>(fields))
+            {
+                return BadRequest();
+            }
 
-            if (employeeDTO == null)
+            ExpandoObject expandoObject = await this._employeeService.GetAsync<EmployeeDto>(fields, employeeId);
+
+            if (expandoObject == null)
             {
                 return NotFound();
             }
 
-            return Ok(employeeDTO);
+            return Ok(expandoObject);
         }
 
         // [GET] .../api/employees/{employeeId}/orders/

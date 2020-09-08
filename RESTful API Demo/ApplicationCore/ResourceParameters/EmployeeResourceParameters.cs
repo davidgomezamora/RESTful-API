@@ -9,5 +9,10 @@ namespace ApplicationCore.ResourceParameters
     {
         public DateTime? HireDate { get; set; }
         public string? City { get; set; }
+        public EmployeeResourceParameters()
+        {
+            // Order by for default
+            this.OrderBy = "FullName";
+        } 
     }
 }

@@ -11,12 +11,13 @@ using ApplicationCore.DTO.Order;
 using Common.Helpers;
 using Infraestructure.Entities;
 using Common.BaseService;
+using System.Dynamic;
 
 namespace ApplicationCore.Services
 {
     public interface IEmployeeService : IBaseService
     {
-        Task<PagedList<EmployeeDto>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
+        Task<PagedList<ExpandoObject>> GetEmployeesAsync(EmployeeResourceParameters employeeResourceParameters);
         //Task<EmployeeDto> GetEmployeeAsync(string employeeId);
         Task<List<OrderDto>> GetOrdersAsync(string employeeId);
         /*Task<EmployeeDto> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto);

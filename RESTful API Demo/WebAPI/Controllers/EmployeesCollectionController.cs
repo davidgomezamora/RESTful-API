@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.DTO.Employee;
@@ -18,8 +19,7 @@ namespace RESTful_API_Demo.Controllers
     [ApiVersion("0.5", Deprecated = true)]
     // Definición del endpoint de este controlador ../api/employeesCollection/
     [Route("api/[controller]")]
-    [ApiController]
-    public class EmployeesCollectionController : APIController
+    public class EmployeesCollectionController : APIControllerBase
     {
         private readonly IEmployeeService _employeeService;
 
@@ -32,23 +32,21 @@ namespace RESTful_API_Demo.Controllers
 
         // [GET] .../api/employeesCollection/(id,id,id...)
         [HttpGet("({ids})", Name = "GetEmployeesCollectionAsync")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployeesCollectionAsync(
-            [FromRoute]
-            [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
+        public async Task<ActionResult<IEnumerable<ExpandoObject>>> GetEmployeesCollectionAsync([FromRoute][ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids, string fields)
         {
-            if (ids == null)
+            if (ids == null || !this._employeeService.ValidateFields<EmployeeDto>(fields))
             {
                 return BadRequest();
             }
 
-            List<EmployeeDto> employeeDtos = await this._employeeService.GetAsync<EmployeeDto>(ids.ToList<object>());
+            List<ExpandoObject> expandoObjects = await this._employeeService.GetAsync<EmployeeDto>(ids.ToList<object>(), fields);
 
-            if (!ids.Count().Equals(employeeDtos.Count()))
+            if (!ids.Count().Equals(expandoObjects.Count()))
             {
                 return NotFound();
             }
 
-            return Ok(employeeDtos);
+            return Ok(expandoObjects);
         }
 
         // [POST] .../api/employeesCollection/
@@ -62,7 +60,7 @@ namespace RESTful_API_Demo.Controllers
                 return NotFound();
             }
 
-            var idsEmployees = String.Join(",", employeesDto.Select(x => x.EmployeeId));
+            string idsEmployees = String.Join(",", employeesDto.Select(x => x.EmployeeId));
 
             return CreatedAtRoute("GetEmployeesCollectionAsync", new { ids = idsEmployees }, employeesDto);
         }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ApplicationCore.Services;
-using Infraestructure.Context;
+using Infrastructure.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +20,6 @@ using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Newtonsoft.Json.Serialization;
 using Common.DataRepository;
-using Common.Security;
 
 namespace WebAPI
 {
@@ -109,6 +108,8 @@ namespace WebAPI
 
             // Establece el contexto de la base de datos y define la cadena de conexión establecida en el archivo appsettings.json
             services.AddDbContext<NorthwindContext>(options => {
+                // Para configurar por omisión la no carga de entidades relacionadas
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 // ConnectionsString > ConnectionDatabase
                 options.UseSqlServer(this.Configuration.GetConnectionString("ConnectionDatabase"));
             });
@@ -127,13 +128,6 @@ namespace WebAPI
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
             /*
-             * Repositorio
-             * Requiere del paquete Nuget: Security (David Andrés Gómez Zamora)
-             * Agregar [using Security;] en este archivo
-             */
-            services.AddScoped(typeof(IDataSecurity), typeof(DataSecurity));
-
-            /*
              *Contexto de la base de datos
              * Requiere del paquete Nuget: Microsoft.EntityFrameworkCore (Nuget.org), no es necesario instalarlo si se tiene instalado el paquete Repository (David Andrés Gómez Zamora)
              */
@@ -144,6 +138,7 @@ namespace WebAPI
              * Requiere la dependencia con la capa ApplicationCore
              */
             services.AddScoped(typeof(IEmployeeService), typeof(EmployeeService));
+            services.AddScoped(typeof(IOrderService), typeof(OrderService));
 
             /*
              * ---------------------------------------------------------

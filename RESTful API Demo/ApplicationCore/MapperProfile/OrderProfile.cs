@@ -1,7 +1,6 @@
 ﻿using ApplicationCore.DTO.Order;
 using AutoMapper;
-using Common.Security;
-using Infraestructure.Entities;
+using Infrastructure.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,17 +11,19 @@ namespace ApplicationCore.MapperProfile
     {
         public OrderProfile()
         {
-            CreateMap<Orders, OrderDto>()
-                .ForMember(dest => dest.OrderId,
-                opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.OrderId.ToString())))
-                .ForMember(dest => dest.CustomerId,
-                opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.CustomerId.ToString())))
-                .ForMember(dest => dest.EmployeeId,
-                opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.EmployeeId.ToString())));
+            // Definición de como debe mapearse la entidad y el DTO
+            CreateMap<Order, OrderDto>();
+            CreateMap<Order, OrderForUpdateDto>()
+                .ReverseMap();
+            CreateMap<Order, OrderForAdditionDto>()
+                .ReverseMap();
 
-            CreateMap<OrderForAdditionDto, Orders>()
-                .ForMember(dest => dest.EmployeeId,
-                opt => opt.MapFrom(src => new DataSecurity().AESDescrypt(src.EmployeeId)));
+            CreateMap<OrderForSortingDto, Order>()
+                .ForMember(dest => dest.OrderId,
+                opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.Freight,
+                opt => opt.MapFrom(src => src.Freight))
+                .ForAllOtherMembers(opt => opt.Ignore());
         }
     }
 }

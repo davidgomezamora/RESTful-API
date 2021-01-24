@@ -9,7 +9,8 @@ using ApplicationCore.DTO.Employee;
 using ApplicationCore.DTO.Order;
 using ApplicationCore.ResourceParameters;
 using ApplicationCore.Services;
-using Common.Helpers;
+using Common.APIController;
+using Common.DataService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -26,191 +27,83 @@ namespace RESTful_API_Demo.Controllers
     [ApiVersion("0.5", Deprecated = true)]
     // Definición del endpoint de este controlador ../api/employees/
     [Route("api/[controller]")]
-    public class EmployeesController : APIControllerBase
+    public class EmployeesController : APIControllerBase<IEmployeeService, int, EmployeeDto, EmployeeForAdditionDto, EmployeeForUpdateDto, EmployeeForSortingDto, EmployeeResourceParameters>
     {
-        private readonly IEmployeeService _employeeService;
-
-        // Inyección del servicio de la capa ApplicationCore
-        public EmployeesController(IEmployeeService employeeService)
+        private readonly IOrderService _orderService;
+        public EmployeesController(IEmployeeService employeeService, IOrderService orderService) : base(employeeService, "Employee")
         {
-            this._employeeService = employeeService ??
-                throw new ArgumentNullException(nameof(employeeService));
+            this._orderService = orderService ??
+                throw new ArgumentNullException(nameof(orderService));
         }
 
-        // [GET]: .../api/employees/
-        [HttpGet(Name = "GetEmployees")]
-        public async Task<ActionResult<PagedList<ExpandoObject>>> GetEmployeesAsync([FromQuery] EmployeeResourceParameters employeeResourceParameters)
+        [HttpPost(Name = "AddEmployee")]
+        public override Task<ActionResult<EmployeeDto>> AddAsync(EmployeeForAdditionDto additionDto)
         {
-            if (!this._employeeService.ValidateOrderBy(employeeResourceParameters.OrderBy) || !this._employeeService.ValidateFields<EmployeeDto>(employeeResourceParameters.Fields))
+            return base.AddAsync(additionDto);
+        }
+
+        [HttpGet("{id}", Name = "GetEmployee")]
+        public override Task<ActionResult<ExpandoObject>> GetAsync(int id, string fields)
+        {
+            return base.GetAsync(id, fields);
+        }
+
+        [HttpGet(Name = "GetEmployees")]
+        public override Task<ActionResult<PagedList<ExpandoObject>>> GetPagedListAsync([FromQuery] EmployeeResourceParameters resourceParameters)
+        {
+            return base.GetPagedListAsync(resourceParameters);
+        }
+
+        [HttpGet("list", Name = "GetEmployeesList")]
+        public override Task<ActionResult<List<ExpandoObject>>> GetListAsync([FromQuery] EmployeeResourceParameters resourceParameters)
+        {
+            return base.GetListAsync(resourceParameters);
+        }
+
+        [HttpPut("{id}", Name = "UpdateEmployee")]
+        public override Task<ActionResult<EmployeeDto>> UpdateAsync(int id, EmployeeForUpdateDto updateDto)
+        {
+            return base.UpdateAsync(id, updateDto);
+        }
+
+        [HttpPatch("{id}", Name = "PartiallyUpdateEmployee")]
+        public override Task<ActionResult> PartiallyUpdateAsync(int id, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
+        {
+            return base.PartiallyUpdateAsync(id, jsonPatchDocument);
+        }
+
+        [HttpDelete("{id}", Name = "RemoveEmployee")]
+        public override Task<ActionResult> RemoveAsync(int id)
+        {
+            return base.RemoveAsync(id);
+        }
+
+        [HttpGet("{employeeId}/orders")]
+        public async Task<ActionResult<PagedList<ExpandoObject>>> GetOrdersListAsync(int employeeId, [FromQuery] OrderResourceParameters resourceParameters)
+        {
+            // Agregar id de filtro
+            resourceParameters.EmployeeId = employeeId;
+
+            if (!this._orderService.ValidateOrderByString(resourceParameters.OrderBy) || !this._orderService.ValidateFields(resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            PagedList<ExpandoObject> pagedList = await this._employeeService.GetEmployeesAsync(employeeResourceParameters);
+            List<ExpandoObject> expandoObjects = await this._orderService.GetListAsync(resourceParameters);
 
-            if (pagedList.Results.Count() == 0)
+            if (!expandoObjects.Any())
             {
                 return NoContent();
             }
 
-            if(pagedList.HasPrevious)
-            {
-                pagedList.PreviousPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.PreviousPage, "GetEmployees");
-            }
-
-            if (pagedList.HasNext)
-            {
-                pagedList.NextPageLink = CreateResourceUri(employeeResourceParameters, ResourceUriType.NextPage, "GetEmployees");
-            }
-
-            return Ok(pagedList);
+            return Ok(expandoObjects);
         }
 
-        // [GET]: .../api/employees/{employeeId}/
-        [HttpGet("{employeeId}", Name = "GetEmployeeAsync")]
-        public async Task<ActionResult<ExpandoObject>> GetEmployeeAsync(string employeeId, string fields)
-        {
-            if (!this._employeeService.ValidateFields<EmployeeDto>(fields))
-            {
-                return BadRequest();
-            }
-
-            ExpandoObject expandoObject = await this._employeeService.GetAsync<EmployeeDto>(fields, employeeId);
-
-            if (expandoObject == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(expandoObject);
-        }
-
-        // [GET] .../api/employees/{employeeId}/orders/
-        [HttpGet("{employeeId}/orders")]
-        public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersForEmployeeAsync(string employeeId)
-        {
-            List<OrderDto> orderDtos = await this._employeeService.GetOrdersAsync(employeeId);
-
-            if (orderDtos == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(orderDtos);
-        }
-
-        // [POST] .../api/employees/
-        [HttpPost]
-        public async Task<ActionResult<EmployeeDto>> AddEmployeeAsync(EmployeeForAdditionDto employeeForAdditionDto)
-        {
-            EmployeeDto employeeDto = await this._employeeService.AddAsync<EmployeeDto>(employeeForAdditionDto);
-
-            if (employeeDto == null)
-            {
-                return NotFound();
-            }
-
-            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
-        }
-
-        // [PUT]: .../api/employees/{employeeId}/
-        [HttpPut("{employeeId}")]
-        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeAsync(string employeeId, EmployeeForUpdateDto employeeForUpdateDto)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                if (await this._employeeService.UpdateAsync(employeeId, employeeForUpdateDto))
-                {
-                    return NoContent();
-                }
-
-                // 304 (Not Modified)
-                return StatusCode(304);
-            }
-
-            // Upserting
-            EmployeeDto employeeDto = await this._employeeService.UpsertingAsync<EmployeeDto, EmployeeForAdditionDto>(employeeId, employeeForUpdateDto);
-
-            if (employeeDto == null)
-            {
-                return NotFound();
-            }
-
-            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
-        }
-
-        // [PATCH]: .../api/employees/{employeeId}/
-        [HttpPatch("{employeeId}")]
-        public async Task<ActionResult> PartiallyUpdateEmployeeAsync(string employeeId, JsonPatchDocument<EmployeeForUpdateDto> jsonPatchDocument)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                ModelStateDictionary modelStateDictionary = await this._employeeService.PartiallyUpdateAsync<EmployeeForUpdateDto>(employeeId, jsonPatchDocument);
-
-                if (modelStateDictionary != null)
-                {
-                    ModelState.Merge(modelStateDictionary);
-
-                    if (!ModelState.IsValid)
-                    {
-                        return ValidationProblem(ModelState);
-                    }
-
-                    return NoContent();
-                }
-
-                // 304 (Not Modified)
-                return StatusCode(304);
-            }
-
-            // Upserting
-            EmployeeDto employeeDto = await this._employeeService.UpsertingAsync<EmployeeDto, EmployeeForUpdateDto, EmployeeForAdditionDto>(employeeId, jsonPatchDocument, ModelState);
-
-            if (!ModelState.IsValid)
-            {
-                return ValidationProblem(ModelState);
-            }
-
-            if (employeeDto == null)
-            {
-                return NotFound();
-            }
-
-            return CreatedAtRoute("GetEmployeeAsync", new { employeeId = employeeDto.EmployeeId }, employeeDto);
-        }
-
-        // [DELETE]: .../api/employees/{employeeId}/
-        [HttpDelete("{employeeId}")]
-        public async Task<ActionResult> RemoveEmployeeAsync(string employeeId)
-        {
-            if (await this._employeeService.ExistsAsync(employeeId))
-            {
-                if (await this._employeeService.RemoveAsync(employeeId))
-                {
-                    return NoContent();
-                }
-
-                // 304 (Not Modified)
-                return StatusCode(304);
-            }
-
-            return NotFound();
-        }
-
-        // [GET]: .../api/employees/error/
+        // Test
         [HttpGet("error")]
         public ActionResult<EmployeeDto> GetError()
         {
             throw new Exception("This is a test exception.");
-        }
-
-        // [OPTIONS]: .../api/employees/
-        [HttpOptions]
-        public IActionResult GetOptions()
-        {
-            Response.Headers.Add("Allow", "GET, POST, DELETE, PUT, PATCH");
-
-            return Ok();
         }
     }
 }

@@ -9,17 +9,16 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Entities
 {
     [Keyless]
-    public partial class CustomerAndSuppliersByCity
+    public partial class QuarterlyOrder
     {
-        [StringLength(15)]
-        public string City { get; set; }
-        [Required]
+        [Column("CustomerID")]
+        [StringLength(5)]
+        public string CustomerId { get; set; }
         [StringLength(40)]
         public string CompanyName { get; set; }
-        [StringLength(30)]
-        public string ContactName { get; set; }
-        [Required]
-        [StringLength(9)]
-        public string Relationship { get; set; }
+        [StringLength(15)]
+        public string City { get; set; }
+        [StringLength(15)]
+        public string Country { get; set; }
     }
 }

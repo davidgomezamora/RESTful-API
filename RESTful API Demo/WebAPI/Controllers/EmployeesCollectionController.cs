@@ -6,8 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.DTO.Employee;
 using ApplicationCore.Services;
-using Common.Helpers;
-using Infraestructure.Entities;
+using Common.APIController;
+using Common.DataService;
+using Infrastructure.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +20,7 @@ namespace RESTful_API_Demo.Controllers
     [ApiVersion("0.5", Deprecated = true)]
     // Definición del endpoint de este controlador ../api/employeesCollection/
     [Route("api/[controller]")]
-    public class EmployeesCollectionController : APIControllerBase
+    public class EmployeesCollectionController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
 
@@ -32,14 +33,14 @@ namespace RESTful_API_Demo.Controllers
 
         // [GET] .../api/employeesCollection/(id,id,id...)
         [HttpGet("({ids})", Name = "GetEmployeesCollectionAsync")]
-        public async Task<ActionResult<IEnumerable<ExpandoObject>>> GetEmployeesCollectionAsync([FromRoute][ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids, string fields)
+        public async Task<ActionResult<IEnumerable<ExpandoObject>>> GetEmployeesCollectionAsync([FromRoute][ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<int> ids, string fields)
         {
-            if (ids == null || !this._employeeService.ValidateFields<EmployeeDto>(fields))
+            if (ids is null || !this._employeeService.ValidateFields(fields))
             {
                 return BadRequest();
             }
 
-            List<ExpandoObject> expandoObjects = await this._employeeService.GetAsync<EmployeeDto>(ids.ToList<object>(), fields);
+            List<ExpandoObject> expandoObjects = await this._employeeService.GetAsync(ids.Cast<object>().ToList(), fields);
 
             if (!ids.Count().Equals(expandoObjects.Count()))
             {
@@ -53,7 +54,7 @@ namespace RESTful_API_Demo.Controllers
         [HttpPost]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> AddEmployeesCollectionAsync(List<EmployeeForAdditionDto> employeesForAdditionDto)
         {
-            List<EmployeeDto> employeesDto = await this._employeeService.AddAsync<EmployeeDto, EmployeeForAdditionDto>(employeesForAdditionDto);
+            List<EmployeeDto> employeesDto = await this._employeeService.AddAsync(employeesForAdditionDto);
 
             if (employeesDto == null)
             {
@@ -69,14 +70,14 @@ namespace RESTful_API_Demo.Controllers
         [HttpDelete("({ids})")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> RemoveEmployeesCollectionAsync(
             [FromRoute]
-            [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
+            [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<int> ids)
         {
-            if (ids == null)
+            if (ids is null)
             {
                 return BadRequest();
             }
 
-            if (ids.Count() == (await this._employeeService.RemoveAsync(ids.ToList<object>())).Count())
+            if (ids.Count().Equals((await this._employeeService.RemoveAsync(ids.Cast<object>().ToList())).Count()))
             {
                 return NoContent();
             }

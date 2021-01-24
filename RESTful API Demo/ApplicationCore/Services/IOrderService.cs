@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using ApplicationCore.DTO.Employee;
-using ApplicationCore.ResourceParameters;
 using ApplicationCore.DTO.Order;
+using ApplicationCore.ResourceParameters;
 using Infrastructure.Entities;
 using System.Dynamic;
 using Common.DataService;
 
 namespace ApplicationCore.Services
 {
-    public interface IEmployeeService : IBaseService<EmployeeDto, EmployeeForAdditionDto, EmployeeForUpdateDto, EmployeeForSortingDto, EmployeeResourceParameters> { }
+    public interface IOrderService : IBaseService<OrderDto, OrderForAdditionDto, OrderForUpdateDto, OrderForSortingDto, OrderResourceParameters>
+    {
+    }
 }

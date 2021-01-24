@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApplicationCore.DTO.Order
 {
-    public class OrderForAdditionDto : OrderForManipulationDto
+    public class OrderForSortingDto : OrderDto
     {
     }
 }

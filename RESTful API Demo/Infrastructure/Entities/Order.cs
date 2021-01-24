@@ -8,9 +8,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Entities
 {
-    [Keyless]
-    public partial class OrdersQry
+    [Index(nameof(CustomerId), Name = "CustomerID")]
+    [Index(nameof(CustomerId), Name = "CustomersOrders")]
+    [Index(nameof(EmployeeId), Name = "EmployeeID")]
+    [Index(nameof(EmployeeId), Name = "EmployeesOrders")]
+    [Index(nameof(OrderDate), Name = "OrderDate")]
+    [Index(nameof(ShipPostalCode), Name = "ShipPostalCode")]
+    [Index(nameof(ShippedDate), Name = "ShippedDate")]
+    [Index(nameof(ShipVia), Name = "ShippersOrders")]
+    public partial class Order
     {
+        public Order()
+        {
+            OrderDetails = new HashSet<OrderDetail>();
+        }
+
+        [Key]
         [Column("OrderID")]
         public int OrderId { get; set; }
         [Column("CustomerID")]
@@ -39,18 +52,17 @@ namespace Infrastructure.Entities
         public string ShipPostalCode { get; set; }
         [StringLength(15)]
         public string ShipCountry { get; set; }
-        [Required]
-        [StringLength(40)]
-        public string CompanyName { get; set; }
-        [StringLength(60)]
-        public string Address { get; set; }
-        [StringLength(15)]
-        public string City { get; set; }
-        [StringLength(15)]
-        public string Region { get; set; }
-        [StringLength(10)]
-        public string PostalCode { get; set; }
-        [StringLength(15)]
-        public string Country { get; set; }
+
+        [ForeignKey(nameof(CustomerId))]
+        [InverseProperty("Orders")]
+        public virtual Customer Customer { get; set; }
+        [ForeignKey(nameof(EmployeeId))]
+        [InverseProperty("Orders")]
+        public virtual Employee Employee { get; set; }
+        [ForeignKey(nameof(ShipVia))]
+        [InverseProperty(nameof(Shipper.Orders))]
+        public virtual Shipper ShipViaNavigation { get; set; }
+        [InverseProperty(nameof(OrderDetail.Order))]
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }

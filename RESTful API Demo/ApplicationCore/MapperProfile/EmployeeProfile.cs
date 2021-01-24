@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ApplicationCore.DTO.Employee;
 using AutoMapper;
-using Common.Security;
-using Infraestructure.Entities;
+using Infrastructure.Entities;
 
 namespace ApplicationCore.MapperProfile
 {
@@ -13,17 +12,15 @@ namespace ApplicationCore.MapperProfile
         public EmployeeProfile()
         {
             // Definición de como debe mapearse la entidad y el DTO
-            CreateMap<Employees, EmployeeDto>()
+            CreateMap<Employee, EmployeeDto>()
                 .ForMember(dest => dest.FullName,
-                opt => opt.MapFrom(src => src.FirstName + " " + src.LastName))
-                .ForMember(dest => dest.EmployeeId,
-                opt => opt.MapFrom(src => new DataSecurity().AESEncrypt(src.EmployeeId.ToString())));
-            CreateMap<Employees, EmployeeForUpdateDto>();
-            CreateMap<Employees, EmployeeForAdditionDto>();
+                opt => opt.MapFrom(src => src.FirstName + " " + src.LastName));
+            CreateMap<Employee, EmployeeForUpdateDto>();
+            CreateMap<Employee, EmployeeForAdditionDto>();
 
-            CreateMap<EmployeeForUpdateDto, Employees>();
-            CreateMap<EmployeeForAdditionDto, Employees>();
-            CreateMap<EmployeeForSortingDto, Employees>()
+            CreateMap<EmployeeForUpdateDto, Employee>();
+            CreateMap<EmployeeForAdditionDto, Employee>();
+            CreateMap<EmployeeForSortingDto, Employee>()
                 .ForMember(dest => dest.FirstName,
                 opt => opt.MapFrom(src => src.FullName))
                 .ForMember(dest => dest.LastName,

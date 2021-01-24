@@ -9,12 +9,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Entities
 {
     [Keyless]
-    public partial class CurrentProductList
+    public partial class OrderSubtotal
     {
-        [Column("ProductID")]
-        public int ProductId { get; set; }
-        [Required]
-        [StringLength(40)]
-        public string ProductName { get; set; }
+        [Column("OrderID")]
+        public int OrderId { get; set; }
+        [Column(TypeName = "money")]
+        public decimal? Subtotal { get; set; }
     }
 }

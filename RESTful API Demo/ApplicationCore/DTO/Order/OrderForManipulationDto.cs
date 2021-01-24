@@ -1,13 +1,11 @@
-﻿using Common.DataService;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace ApplicationCore.DTO.Order
 {
-    public class OrderDto : IDto
+    public class OrderForManipulationDto
     {
-        public virtual int OrderId { get; set; }
         public virtual string CustomerId { get; set; }
         public virtual int? EmployeeId { get; set; }
         public virtual DateTime? OrderDate { get; set; }
@@ -21,10 +19,5 @@ namespace ApplicationCore.DTO.Order
         public virtual string ShipRegion { get; set; }
         public virtual string ShipPostalCode { get; set; }
         public virtual string ShipCountry { get; set; }
-
-        public object GetId()
-        {
-            return this.OrderId;
-        }
     }
 }

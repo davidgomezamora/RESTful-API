@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.DataService;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
@@ -8,9 +9,9 @@ using System.Xml.Serialization;
 namespace ApplicationCore.DTO.Employee
 {
     // [DataContract]
-    public class EmployeeDto
+    public class EmployeeDto : IDto
     {
-        public virtual string EmployeeId { get; set; }
+        public virtual int EmployeeId { get; set; }
         public virtual string FullName { get; set; }
         public virtual string Title { get; set; }
         public virtual string TitleOfCourtesy { get; set; }
@@ -27,5 +28,10 @@ namespace ApplicationCore.DTO.Employee
         public virtual string Notes { get; set; }
         public virtual int? ReportsTo { get; set; }
         public virtual string PhotoPath { get; set; }
+
+        public object GetId()
+        {
+            return this.EmployeeId;
+        }
     }
 }
